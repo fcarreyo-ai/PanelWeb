@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Gestión de Guardias</title>
+  <title>Registro de Faltas</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
   <style>
@@ -11,39 +11,81 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       margin: 0;
       padding: 16px;
-      background-color: var(--tg-theme-bg-color, #f5f5f5); 
-      color: var(--tg-theme-text-color, #212121);
+      background-color: var(--tg-theme-bg-color, #181818); 
+      color: var(--tg-theme-text-color, #f5f5f5);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      min-height: 90vh;
-    }
-    .card {
-      background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-      width: 100%;
-      max-width: 400px;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      text-align: center;
+      min-height: 95vh;
       box-sizing: border-box;
     }
+
+    .card {
+      background-color: var(--tg-theme-secondary-bg-color, #242424);
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+    }
+
     h2 {
-      color: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-color, #5288c1);
       margin-top: 0;
-      margin-bottom: 8px;
-      font-size: 24px;
+      margin-bottom: 4px;
+      font-size: 22px;
+      text-align: center;
     }
-    p {
-      color: var(--tg-theme-hint-color, #757575);
+
+    .subtitle {
+      color: var(--tg-theme-hint-color, #aaaaaa);
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    label {
       font-size: 14px;
-      margin-bottom: 24px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--tg-theme-text-color, #f5f5f5);
     }
+
+    /* Estilos adaptados para inputs y selects en modo oscuro nativo */
+    select, input[type="number"], input[type="date"], textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--tg-theme-hint-color, #444444);
+      background-color: var(--tg-theme-bg-color, #181818);
+      color: var(--tg-theme-text-color, #f5f5f5);
+      font-size: 15px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--tg-theme-button-color, #5288c1);
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
     .btn-panel {
       display: block;
       width: 100%;
-      padding: 16px;
-      margin: 12px 0;
+      padding: 15px;
+      margin-top: 24px;
       background-color: var(--tg-theme-button-color, #2481cc);
       color: var(--tg-theme-button-text-color, #ffffff);
       border: none;
@@ -51,17 +93,26 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: opacity 0.2s ease;
     }
+
+    .btn-panel:active {
+      opacity: 0.85;
+    }
+
     #consola {
-      margin-top: 20px;
-      padding: 10px;
+      width: 100%;
+      max-width: 420px;
+      margin-top: 16px;
+      padding: 12px;
       background-color: #050505;
       color: #00ff00;
       font-family: monospace;
       font-size: 11px;
       border-radius: 8px;
-      text-align: left;
-      min-height: 40px;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -69,44 +120,146 @@
 
   <div class="card">
     <h2 id="saludo">¡Hola!</h2>
-    <p>Panel de Gestión de Guardias 2026</p>
+    <div class="subtitle">Módulo de Asistencia Telepuerto 2026</div>
     
-    <button class="btn-panel" id="btnVacaciones">📝 Solicitar Vacaciones / Permiso</button>
+    <!-- FORMULARIO -->
+    <div class="form-group">
+      <label for="selectNombre">👤 Nombre de la Persona:</label>
+      <select id="selectNombre">
+        <option value="">Cargando personal...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="selectCausa">📌 Causa / Tipo de Falta:</label>
+      <select id="selectCausa">
+        <option value="">Cargando causas...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="inputDuracion">⏳ Duración (Días):</label>
+      <input type="number" id="inputDuracion" min="1" value="1">
+    </div>
+
+    <div class="form-group">
+      <label for="inputFecha">📅 Fecha de Inicio:</label>
+      <input type="date" id="inputFecha">
+    </div>
+
+    <div class="form-group">
+      <label for="txtObservaciones">💬 Observaciones:</label>
+      <textarea id="txtObservaciones" placeholder="Detalles adicionales o justificación..."></textarea>
+    </div>
     
-    <div id="consola">Iniciando diagnóstico en GitHub Pages...</div>
+    <button class="btn-panel" id="btnRegistrar">📝 Registrar Falta</button>
   </div>
 
+  <div id="consola">Iniciando diagnóstico...</div>
+
   <script>
+    // URL de tu API de Google Apps Script (Reemplázala por tu URL /exec real)
+    const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
+
     try {
       const tg = window.Telegram.WebApp;
       tg.expand(); 
       tg.ready();
 
-      // CAPTURAR PARÁMETROS EN GITHUB: Leemos la URL directamente usando JavaScript estándar
+      // Captura de datos iniciales en la URL
       const urlParams = new URLSearchParams(window.location.search);
       const chatIdAsignado = urlParams.get('chatId') || "";
       const nombreAsignado = urlParams.get('nombre') || "Usuario";
       
       document.getElementById('saludo').innerText = "¡Hola, " + nombreAsignado + "!";
-      document.getElementById('consola').innerText = "Diagnóstico: Datos cargados. ChatID: " + chatIdAsignado;
+      
+      // Colocar por defecto la fecha de hoy en el selector nativo
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('inputFecha').value = hoy;
 
-      document.getElementById('btnVacaciones').addEventListener('click', function() {
+      // ==========================================
+      // FUNCION PARA CARGAR LOS COMBOS DESDE GOOGLE
+      // ==========================================
+      function cargarCombobox() {
+        document.getElementById('consola').innerText = "Solicitando listas a Google Sheets...";
+        
+        // Llamada fetch pasándole el parámetro ?obtener=combos
+        fetch(`${URL_BACKEND}?obtener=combos`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.estatus === "OK") {
+              // 1. Llenar Combo de Personal
+              const selectNombre = document.getElementById('selectNombre');
+              selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+              data.personal.forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p;
+                selectNombre.appendChild(opt);
+              });
+
+              // 2. Llenar Combo de Causas
+              const selectCausa = document.getElementById('selectCausa');
+              selectCausa.innerHTML = '<option value="">-- Seleccione la Causa --</option>';
+              data.causas.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                selectCausa.appendChild(opt);
+              });
+
+              document.getElementById('consola').innerText = "Diagnóstico: Formulario listo. Datos cargados desde Google Sheets con éxito.";
+            } else {
+              document.getElementById('consola').innerText = "Error del Servidor: " + data.detalle;
+            }
+          })
+          .catch(err => {
+            document.getElementById('consola').innerText = "Error de conexión Fetch:\nComprueba si la URL del backend es correcta y si está ejecutada como acceso 'Cualquiera'.\nDetalle: " + err.message;
+          });
+      }
+
+      // Ejecutar la carga apenas abra la Mini App
+      cargarCombobox();
+
+      // ==========================================
+      // ENVÍO DEL FORMULARIO A TELEGRAM
+      // ==========================================
+      document.getElementById('btnRegistrar').addEventListener('click', function() {
+        const nombreSel = document.getElementById('selectNombre').value;
+        const causaSel = document.getElementById('selectCausa').value;
+        const duracionSel = document.getElementById('inputDuracion').value;
+        const fechaSel = document.getElementById('inputFecha').value;
+        const obsSel = document.getElementById('txtObservaciones').value;
+
+        // Validación básica en caliente
+        if (!nombreSel || !causaSel || !duracionSel || !fechaSel) {
+          alert("Por favor, rellene todos los campos obligatorios del registro.");
+          return;
+        }
+
         try {
-          const datosPrueba = {
-            accion: "solicitar_vacaciones",
-            chatId: chatIdAsignado,       
-            usuario: nombreAsignado,      
-            origen: "MiniApp GitHub"
+          const paqueteFalta = {
+            accion: "registrar_falta_solicitud",
+            chatId: chatIdAsignado,
+            operador: nombreAsignado,
+            datos: {
+              nombre: nombreSel,
+              causa: causaSel,
+              duracion: parseInt(duracionSel, 10),
+              fechaInicio: fechaSel,
+              observaciones: obsSel
+            }
           };
           
-          tg.sendData(JSON.stringify(datosPrueba));
+          // Enviamos el JSON limpio de vuelta al bot por el canal seguro
+          tg.sendData(JSON.stringify(paqueteFalta));
         } catch (errBoton) {
-          document.getElementById('consola').innerText = "Error Botón: " + errBoton.message;
+          document.getElementById('consola').innerText = "Error al enviar datos: " + errBoton.message;
         }
       });
 
     } catch (errGeneral) {
-      alert("Error crítico: " + errGeneral.message);
+      alert("Error crítico en la WebApp: " + errGeneral.message);
     }
   </script>
 </body>
