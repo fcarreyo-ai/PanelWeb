@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Gestión de Guardias 2026</title>
-  <!-- SDK Oficial de Telegram WebApps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -192,7 +191,6 @@
 
   <div class="container">
     
-    <!-- PANTALLA 1: MENÚ PRINCIPAL -->
     <div id="viewMenu" class="view active">
       <div class="user-tag" id="userTagMenu">Usuario: ---</div>
       <h2 style="margin-top: 25px;">¡Hola, Frankgel!</h2>
@@ -202,12 +200,11 @@
         📝 Registrar Falta
       </button>
       
-      <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: center; border: 1px solid #222;">
-        Diagnóstico: Inicializando variables y esperando origen de datos...
+      <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: left; border: 1px solid #222; white-space: pre-wrap; word-break: break-all;">
+        Diagnóstico: Inicializando y conectando con el Telepuerto...
       </div>
     </div>
 
-    <!-- PANTALLA 2: FORMULARIO DE REGISTRO (DINÁMICO) -->
     <div id="viewFormulario" class="view">
       <div class="user-tag" id="userTagForm">Usuario: ---</div>
       <h2>Registrar Falta</h2>
@@ -215,17 +212,15 @@
       
       <div class="form-group">
         <label>👤 Nombre de la Persona:</label>
-        <!-- Dejamos las opciones vacías para que tu script de Google Sheets las llene dinámicamente -->
         <select id="inputNombre">
-          <option value="">-- Seleccione Personal --</option>
+          <option value="">-- Cargando Personal --</option>
         </select>
       </div>
       
       <div class="form-group">
         <label>📌 Causa / Tipo de Falta:</label>
-        <!-- Dejamos las opciones vacías para que tu script las llene dinámicamente desde FaltasCausas -->
         <select id="inputCausa">
-          <option value="">-- Seleccione Causa --</option>
+          <option value="">-- Cargando Causas --</option>
         </select>
       </div>
       
@@ -248,7 +243,6 @@
       <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
     </div>
 
-    <!-- PANTALLA 3: PREVISUALIZACIÓN Y CONFIRMACIÓN -->
     <div id="viewConfirmar" class="view">
       <div class="user-tag" id="userTagConfirm">Usuario: ---</div>
       <h2>Confirmar Registro</h2>
@@ -281,7 +275,6 @@
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
     </div>
 
-    <!-- PANTALLA 4: PROCESANDO ACCIÓN EN RED -->
     <div id="viewProcesando" class="view">
       <h2>Conectando con Servidor</h2>
       <div class="subtitle" id="txtProgresoSub">Sincronizando flujos...</div>
@@ -293,6 +286,15 @@
   </div>
 
   <script>
+    // Capturador de errores global para auditoría directa en la pantalla del teléfono
+    window.addEventListener('error', function(e) {
+      const caja = document.getElementById('diagnosticoCarga');
+      if (caja) {
+        caja.style.color = '#ff8a8a';
+        caja.innerText = "❌ ERROR INTERNO DE SCRIPT:\n" + e.message + "\nLínea: " + e.lineno;
+      }
+    });
+
     // 1. Inicialización de Telegram WebApp
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) {
@@ -300,33 +302,64 @@
       tg.ready();
     }
 
-    // 2. Extracción segura de parámetros URL
     const paramsUrl = new URLSearchParams(window.location.search);
     const TELEGRAM_CHAT_ID = paramsUrl.get("chatId") || "ID_DESCONOCIDO";
     const TELEGRAM_USER_NAME = paramsUrl.get("nombre") || "Operador";
 
-    // URL oficial e invariable de tu WebApp de Google
+    // URL invariable de tu WebApp de Google
     const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynV1lhJTc3jWRTr9hV13Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
 
     let datosMemoriaOculta = null;
 
-    // Pintar los identificadores visuales de usuario
+    // Pintar etiquetas de usuario
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
 
-    // LÓGICA DE DIAGNÓSTICO RESTAURADA
-    // Monitorea cuántos datos inyecta dinámicamente tu Google Script en los combos reales
-    function actualizarDiagnostico() {
-      const ops = document.getElementById('inputNombre').options.length - 1;
-      const causas = document.getElementById('inputCausa').options.length - 1;
-      document.getElementById('diagnosticoCarga').innerText = 
-        `📡 Origen Sheets Vinculado\n• Personal en combo: ${ops} cargados\n• Causas en combo: ${causas} cargadas\n• ID de Supervisor: ${TELEGRAM_CHAT_ID}`;
-    }
+    // 2. CONEXIÓN DINÁMICA CON TU MYDOGET DE GOOGLE SHEETS
+    document.addEventListener("DOMContentLoaded", () => {
+      const cajaDiag = document.getElementById('diagnosticoCarga');
+      cajaDiag.innerText = "📡 Conectando al servidor para sincronizar operadores y causas...";
 
-    // Ejecutar diagnóstico inicial y configurar un observador para cuando tu backend cargue los datos reales
-    actualizarDiagnostico();
-    setTimeout(actualizarDiagnostico, 2000); // Re-chequeo breve para capturar la inyección síncrona/asíncrona de tu Script
+      fetch(`${URL_BACKEND}?obtener=combos`)
+        .then(res => {
+          if (!res.ok) throw new Error("La red no respondió correctamente.");
+          return res.json();
+        })
+        .then(data => {
+          if (data.estatus === "OK") {
+            const selectNombre = document.getElementById('inputNombre');
+            const selectCausa = document.getElementById('inputCausa');
+
+            // Limpiar e inyectar datos reales de tu base de datos
+            selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+            data.personal.forEach(p => {
+              const opt = document.createElement('option');
+              opt.value = p;
+              opt.innerText = p;
+              selectNombre.appendChild(opt);
+            });
+
+            selectCausa.innerHTML = '<option value="">-- Seleccione Causa --</option>';
+            data.causas.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c;
+              opt.innerText = c;
+              selectCausa.appendChild(opt);
+            });
+
+            // Imprimir éxito en la caja negra
+            cajaDiag.style.color = '#0f0';
+            cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• ChatID Supervisor: ${TELEGRAM_CHAT_ID}`;
+          } else {
+            throw new Error(data.detalle || "Error desconocido del backend.");
+          }
+        })
+        .catch(err => {
+          cajaDiag.style.color = '#ff8a8a';
+          cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}\n\nVerifica los permisos de la macro.`;
+        });
+    });
 
     // Enrutador de pantallas
     function cambiarPantalla(idDestino, logMsg) {
@@ -335,8 +368,7 @@
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // --- MANEJADOR DE CLIC ESTÁNDAR Y COMPATIBLE PARA MÓVILES ---
-    // Quitamos touchstart directo que causaba bloqueos y usamos un mapeo limpio y directo
+    // MANEJADORES DE ACCIONES ULTRA-COMPATIBLES (MÓVIL Y PC)
     function vincularBoton(idBoton, accion) {
       const el = document.getElementById(idBoton);
       if (!el) return;
@@ -346,9 +378,7 @@
       };
     }
 
-    // Vinculación segura de flujos de pantallas
     vincularBoton('btnIrRegistrar', () => {
-      actualizarDiagnostico();
       cambiarPantalla('viewFormulario', "Abriendo formulario.");
     });
 
