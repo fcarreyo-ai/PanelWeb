@@ -55,6 +55,7 @@
       background: rgba(255,255,255,0.05);
       padding: 4px 8px;
       border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     h2 {
@@ -218,11 +219,11 @@
       <div class="subtitle">Panel de Gestión de Guardias 2026</div>
       
       <button class="btn-main" id="btnIrRegistrar" style="padding: 16px; font-size: 15px; margin-top: 30px;">
-        📝 Solicitar Vacaciones / Permiso
+        📝 Registrar Falta
       </button>
       
-      <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: center;">
-        Diagnóstico: Cargando variables...
+      <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: center; border: 1px solid #222;">
+        Diagnóstico: Inicializando variables...
       </div>
     </div>
 
@@ -327,8 +328,8 @@
     const TELEGRAM_CHAT_ID = paramsUrl.get("chatId") || "ID_DESCONOCIDO";
     const TELEGRAM_USER_NAME = paramsUrl.get("nombre") || "Operador";
 
-    // Reemplaza esto con la URL exacta de tu Macro Ejecutable Web App de Google
-    const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
+    // URL oficial de tu WebApp de Google integrada
+    const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynV1lhJTc3jWRTr9hV13Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
 
     // Memoria interna temporal del formulario
     let datosMemoriaOculta = null;
@@ -337,7 +338,10 @@
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
-    document.getElementById('diagnosticoCarga').innerText = "Diagnóstico: Datos cargados. ChatID: " + TELEGRAM_CHAT_ID;
+
+    // RECUPERACIÓN DEL DIAGNÓSTICO DE CARGA DE COMBOS
+    const numOperadores = document.getElementById('inputNombre').options.length - 1; // Restando el placeholder
+    document.getElementById('diagnosticoCarga').innerText = "📡 Datos de combos listos (" + numOperadores + " operadores mapeados).\nChatID: " + TELEGRAM_CHAT_ID;
 
     // Enrutador de pantallas interno
     function cambiarPantalla(idDestino, logMsg) {
@@ -346,25 +350,43 @@
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // --- MANEJADORES DE EVENTOS ---
+    // --- MANEJADORES DE EVENTOS ULTRA-COMPATIBLES (PC Y MÓVIL) ---
+    function asociarAccion(idBoton, callback) {
+      const boton = document.getElementById(idBoton);
+      if (!boton) return;
+      
+      // Escucha el clic clásico (PC)
+      boton.addEventListener('click', (e) => {
+        e.preventDefault();
+        callback();
+      });
+      
+      // Escucha el toque inmediato (Teléfono móvil) sin retrasos de pantalla
+      boton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        callback();
+      }, { passive: false });
+    }
+
+    // ASOCIACIÓN DE COMPORTAMIENTOS A LAS PANTALLAS
     
-    // Menú Principal -> Formulario
-    document.getElementById('btnIrRegistrar').addEventListener('click', () => {
+    // Menú Principal -> Ir al Formulario
+    asociarAccion('btnIrRegistrar', () => {
       cambiarPantalla('viewFormulario', "Abriendo formulario de registro.");
     });
 
     // Formulario -> Volver al Menú
-    document.getElementById('btnVolverMenu').addEventListener('click', () => {
+    asociarAccion('btnVolverMenu', () => {
       cambiarPantalla('viewMenu', "Regresando al menú principal.");
     });
 
-    // Cancelar Confirmación -> Regresar al Formulario para editar
-    document.getElementById('btnCancelarConfirmacion').addEventListener('click', () => {
+    // Cancelar Confirmación -> Regresar al Formulario
+    asociarAccion('btnCancelarConfirmacion', () => {
       cambiarPantalla('viewFormulario', "Retornando para corrección de datos.");
     });
 
     // BOTÓN: ACEPTAR Y PROCESAR (SIMULACIÓN PRE-CÁLCULO)
-    document.getElementById('btnAceptarFalta').addEventListener('click', () => {
+    asociarAccion('btnAceptarFalta', () => {
       const nombre = document.getElementById('inputNombre').value;
       const causa = document.getElementById('inputCausa').value;
       const duracion = document.getElementById('inputDuracion').value;
@@ -376,7 +398,6 @@
         return;
       }
 
-      // Almacenamos en memoria limpia
       datosMemoriaOculta = {
         nombre: nombre,
         causa: causa,
@@ -385,11 +406,9 @@
         observaciones: observaciones
       };
 
-      // Saltamos a la pantalla de procesamiento
       document.getElementById('txtProgresoDinamico').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
       cambiarPantalla('viewProcesando', "Iniciando fetch asíncrono de simulación.");
 
-      // --- FETCH ACTUALIZADO CON PARÁMETROS ANTIBLOQUEO CORS Y REDIRECCIÓN ---
       fetch(URL_BACKEND, {
         method: "POST",
         mode: "cors", 
@@ -397,7 +416,11 @@
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify({ accion: "simular_falta", datos: datosMemoriaOculta })
+        body: JSON.stringify({ 
+          accion: "simular_falta", 
+          chatId: TELEGRAM_CHAT_ID, // 🔒 REQUISITO DEL BÚNKER DE SEGURIDAD GS
+          datos: datosMemoriaOculta 
+        })
       })
       .then(res => {
         if (!res.ok) throw new Error("Respuesta de red no conforme.");
@@ -405,7 +428,6 @@
       })
       .then(resJson => {
         if (resJson.estatus === "OK") {
-          // 1. Mapear Datos Introducidos (Espejo de Seguridad)
           document.getElementById('valNombreIntro').innerText = datosMemoriaOculta.nombre;
           document.getElementById('valCausaIntro').innerText = datosMemoriaOculta.causa;
           document.getElementById('valDuracionIntro').innerText = datosMemoriaOculta.duracion + " día(s)";
@@ -414,14 +436,12 @@
           document.getElementById('valFechaIntro').innerText = `${day}/${month}/${year}`;
           document.getElementById('valObsIntro').innerText = datosMemoriaOculta.observaciones || "Sin observaciones.";
 
-          // 2. Mapear Cálculos Procesados por tus Fórmulas en Google Sheets
           document.getElementById('valFechaSug').innerText = resJson.fechaInicioSugerida;
           document.getElementById('valFechaFin').innerText = resJson.fechaFin;
           document.getElementById('valSigHabil').innerText = resJson.siguienteDiaHabil;
           document.getElementById('valSigGuardia').innerText = resJson.siguienteGuardia;
           document.getElementById('valFechaReinc').innerText = resJson.fechaReincorporacion;
 
-          // Despliegue visual de alerta por colisión
           const divColision = document.getElementById('statusColision');
           if (resJson.colision === true || resJson.colision === "TRUE") {
             divColision.className = "alerta-colision colision-true";
@@ -431,27 +451,26 @@
             divColision.innerText = "✅ LIBRE: Sin colisiones detectadas en el sistema.";
           }
 
-          cambiarPantalla('viewConfirmar', "Pre-cálculo renderizado en pantalla con éxito.");
+          cambiarPantalla('viewConfirmar', "Pre-cálculo renderizado con éxito.");
         } else {
           alert("Error del motor de cálculo: " + resJson.detalle);
-          cambiarPantalla('viewFormulario', "Error devuelto. Regresando al formulario.");
+          cambiarPantalla('viewFormulario', "Error devuelto.");
         }
       })
       .catch(err => {
         console.error("Detalle técnico del error:", err);
         alert("Error de enlace de red: " + err.message);
-        cambiarPantalla('viewFormulario', "Fallo de red. Regresando al formulario.");
+        cambiarPantalla('viewFormulario', "Fallo de red.");
       });
     });
 
     // BOTÓN: CONFIRMAR REGISTRO DEFINITIVO (ASENTAMIENTO PERMANENTE)
-    document.getElementById('btnGuardarDefinitivo').addEventListener('click', () => {
+    asociarAccion('btnGuardarDefinitivo', () => {
       if (!datosMemoriaOculta) return;
 
       document.getElementById('txtProgresoDinamico').innerText = "Asentando registro permanente en base de datos...";
       cambiarPantalla('viewProcesando', "Iniciando fetch definitivo de escritura.");
 
-      // --- FETCH ACTUALIZADO CON PARÁMETROS ANTIBLOQUEO CORS Y REDIRECCIÓN ---
       fetch(URL_BACKEND, {
         method: "POST",
         mode: "cors",
@@ -459,7 +478,11 @@
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify({ accion: "confirmar_falta", datos: datosMemoriaOculta })
+        body: JSON.stringify({ 
+          accion: "confirmar_falta", 
+          chatId: TELEGRAM_CHAT_ID, // 🔒 REQUISITO DEL BÚNKER DE SEGURIDAD GS
+          datos: datosMemoriaOculta 
+        })
       })
       .then(res => {
         if (!res.ok) throw new Error("Respuesta de red no conforme.");
@@ -469,7 +492,6 @@
         if (resJson.estatus === "OK") {
           alert("¡Registro guardado con éxito en Google Sheets!");
           
-          // Si estamos dentro de Telegram, notificamos al bot central para cerrar con broche de oro
           if (tg) {
             tg.sendData(JSON.stringify({
               accion: "falta_asentada_exito",
@@ -478,22 +500,21 @@
             }));
             tg.closeApp();
           } else {
-            // Si pruebas desde PC fuera de Telegram, limpia campos y vuelve a la raíz
             document.getElementById('inputNombre').value = "";
             document.getElementById('inputDuracion').value = "";
             document.getElementById('inputFechaInicio').value = "";
             document.getElementById('inputObservaciones').value = "";
-            cambiarPantalla('viewMenu', "Proceso completado fuera de entorno nativo.");
+            cambiarPantalla('viewMenu', "Proceso completado.");
           }
         } else {
           alert("Error al asentar el registro: " + resJson.detalle);
-          cambiarPantalla('viewConfirmar', "Regresando a revisión.");
+          cambiarPantalla('viewConfirmar', "Regresando.");
         }
       })
       .catch(err => {
         console.error("Detalle técnico del error:", err);
         alert("Error de enlace de red al asentar: " + err.message);
-        cambiarPantalla('viewConfirmar', "Fallo de red en guardado. Regresando a revisión.");
+        cambiarPantalla('viewConfirmar', "Fallo de red.");
       });
     });
   </script>
