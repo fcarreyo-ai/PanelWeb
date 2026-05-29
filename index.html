@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Gestión de Guardias 2026</title>
+  <!-- SDK Oficial de Telegram WebApps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -81,7 +82,6 @@
       display: block;
     }
 
-    /* Elementos de Formulario */
     .form-group {
       margin-bottom: 16px;
     }
@@ -103,11 +103,6 @@
       color: var(--text-color);
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s;
-    }
-
-    select:focus, input:focus, textarea:focus {
-      border-color: var(--btn-primary);
     }
 
     textarea {
@@ -115,7 +110,6 @@
       height: 70px;
     }
 
-    /* Botones */
     .btn-main {
       width: 100%;
       padding: 12px;
@@ -127,15 +121,10 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 10px;
-      transition: background-color 0.2s;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
-    }
-
-    .btn-main:hover {
-      background-color: var(--btn-primary-hover);
     }
 
     .btn-secondary {
@@ -145,12 +134,6 @@
       margin-top: 8px;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.02);
-      color: var(--text-color);
-    }
-
-    /* Cajas Especiales de Resumen y Estado */
     .resumen-box {
       background-color: var(--input-bg);
       border: 1px solid var(--input-border);
@@ -164,10 +147,6 @@
       justify-content: space-between;
       margin-bottom: 8px;
       font-size: 13px;
-    }
-
-    .resumen-item:last-child {
-      margin-bottom: 0;
     }
 
     .resumen-label {
@@ -213,6 +192,7 @@
 
   <div class="container">
     
+    <!-- PANTALLA 1: MENÚ PRINCIPAL -->
     <div id="viewMenu" class="view active">
       <div class="user-tag" id="userTagMenu">Usuario: ---</div>
       <h2 style="margin-top: 25px;">¡Hola, Frankgel!</h2>
@@ -223,10 +203,11 @@
       </button>
       
       <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: center; border: 1px solid #222;">
-        Diagnóstico: Inicializando variables...
+        Diagnóstico: Inicializando variables y esperando origen de datos...
       </div>
     </div>
 
+    <!-- PANTALLA 2: FORMULARIO DE REGISTRO (DINÁMICO) -->
     <div id="viewFormulario" class="view">
       <div class="user-tag" id="userTagForm">Usuario: ---</div>
       <h2>Registrar Falta</h2>
@@ -234,22 +215,17 @@
       
       <div class="form-group">
         <label>👤 Nombre de la Persona:</label>
+        <!-- Dejamos las opciones vacías para que tu script de Google Sheets las llene dinámicamente -->
         <select id="inputNombre">
           <option value="">-- Seleccione Personal --</option>
-          <option value="Adriana Barrios">Adriana Barrios</option>
-          <option value="Frankgel Carreyó">Frankgel Carreyó</option>
-          <option value="Eliana Carreyó">Eliana Carreyó</option>
-          <option value="Migdalia Carreyó">Migdalia Carreyó</option>
         </select>
       </div>
       
       <div class="form-group">
         <label>📌 Causa / Tipo de Falta:</label>
+        <!-- Dejamos las opciones vacías para que tu script las llene dinámicamente desde FaltasCausas -->
         <select id="inputCausa">
-          <option value="Vacaciones">Vacaciones</option>
-          <option value="Permiso Resguardado">Permiso Resguardado</option>
-          <option value="Reposo Médico">Reposo Médico</option>
-          <option value="Falta Injustificada">Falta Injustificada</option>
+          <option value="">-- Seleccione Causa --</option>
         </select>
       </div>
       
@@ -272,6 +248,7 @@
       <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
     </div>
 
+    <!-- PANTALLA 3: PREVISUALIZACIÓN Y CONFIRMACIÓN -->
     <div id="viewConfirmar" class="view">
       <div class="user-tag" id="userTagConfirm">Usuario: ---</div>
       <h2>Confirmar Registro</h2>
@@ -280,21 +257,19 @@
       <div id="statusColision"></div>
       
       <div class="resumen-box">
-        <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Datos Introducidos</div>
-        
+        <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Datos Introducidos</div>
         <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntro" style="font-weight: 600;">--</span></div>
         <div class="resumen-item"><span class="resumen-label">📌 Causa:</span><span class="resumen-value" id="valCausaIntro">--</span></div>
         <div class="resumen-item"><span class="resumen-label">⏳ Duración Solicitada:</span><span class="resumen-value" id="valDuracionIntro">--</span></div>
         <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio Solicitada:</span><span class="resumen-value" id="valFechaIntro">--</span></div>
         <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
           <span class="resumen-label">💬 Observaciones:</span>
-          <span id="valObsIntro" style="color: #e0e0e0; font-size: 12px; font-style: italic; word-break: break-word; padding-left: 4px;">--</span>
+          <span id="valObsIntro" style="color: #e0e0e0; font-size: 12px; font-style: italic;">--</span>
         </div>
 
         <hr style="border: 0; border-top: 1px dashed #444; margin: 14px 0;">
 
-        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Cálculos del Sistema (Sheets)</div>
-        
+        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Cálculos del Sistema (Sheets)</div>
         <div class="resumen-item"><span class="resumen-label">Fecha Inicio Sugerida:</span><span class="resumen-value" id="valFechaSug" style="color: #93c47d;">--</span></div>
         <div class="resumen-item"><span class="resumen-label">Fecha Fin Calculada:</span><span class="resumen-value" id="valFechaFin">--</span></div>
         <div class="resumen-item"><span class="resumen-label">Siguiente Día Hábil:</span><span class="resumen-value" id="valSigHabil">--</span></div>
@@ -306,87 +281,87 @@
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
     </div>
 
+    <!-- PANTALLA 4: PROCESANDO ACCIÓN EN RED -->
     <div id="viewProcesando" class="view">
       <h2>Conectando con Servidor</h2>
       <div class="subtitle" id="txtProgresoSub">Sincronizando flujos...</div>
       <div class="loading-box" id="txtProgresoDinamico">
-        Procesando pre-cálculo en Google Sheets, por favor espere...
+        Procesando, por favor espere...
       </div>
     </div>
 
   </div>
 
   <script>
-    // 1. Inicialización e Interceptación de Parámetros URL de Telegram
+    // 1. Inicialización de Telegram WebApp
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) {
       tg.expand();
       tg.ready();
     }
 
+    // 2. Extracción segura de parámetros URL
     const paramsUrl = new URLSearchParams(window.location.search);
     const TELEGRAM_CHAT_ID = paramsUrl.get("chatId") || "ID_DESCONOCIDO";
     const TELEGRAM_USER_NAME = paramsUrl.get("nombre") || "Operador";
 
-    // URL oficial de tu WebApp de Google integrada
+    // URL oficial e invariable de tu WebApp de Google
     const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynV1lhJTc3jWRTr9hV13Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
 
-    // Memoria interna temporal del formulario
     let datosMemoriaOculta = null;
 
-    // Pintar los tags de usuario en las esquinas
+    // Pintar los identificadores visuales de usuario
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
 
-    // RECUPERACIÓN DEL DIAGNÓSTICO DE CARGA DE COMBOS
-    const numOperadores = document.getElementById('inputNombre').options.length - 1; // Restando el placeholder
-    document.getElementById('diagnosticoCarga').innerText = "📡 Datos de combos listos (" + numOperadores + " operadores mapeados).\nChatID: " + TELEGRAM_CHAT_ID;
+    // LÓGICA DE DIAGNÓSTICO RESTAURADA
+    // Monitorea cuántos datos inyecta dinámicamente tu Google Script en los combos reales
+    function actualizarDiagnostico() {
+      const ops = document.getElementById('inputNombre').options.length - 1;
+      const causas = document.getElementById('inputCausa').options.length - 1;
+      document.getElementById('diagnosticoCarga').innerText = 
+        `📡 Origen Sheets Vinculado\n• Personal en combo: ${ops} cargados\n• Causas en combo: ${causas} cargadas\n• ID de Supervisor: ${TELEGRAM_CHAT_ID}`;
+    }
 
-    // Enrutador de pantallas interno
+    // Ejecutar diagnóstico inicial y configurar un observador para cuando tu backend cargue los datos reales
+    actualizarDiagnostico();
+    setTimeout(actualizarDiagnostico, 2000); // Re-chequeo breve para capturar la inyección síncrona/asíncrona de tu Script
+
+    // Enrutador de pantallas
     function cambiarPantalla(idDestino, logMsg) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById(idDestino).classList.add('active');
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // --- MANEJADORES DE EVENTOS ULTRA-COMPATIBLES (PC Y MÓVIL) ---
-    function asociarAccion(idBoton, callback) {
-      const boton = document.getElementById(idBoton);
-      if (!boton) return;
-      
-      // Escucha el clic clásico (PC)
-      boton.addEventListener('click', (e) => {
+    // --- MANEJADOR DE CLIC ESTÁNDAR Y COMPATIBLE PARA MÓVILES ---
+    // Quitamos touchstart directo que causaba bloqueos y usamos un mapeo limpio y directo
+    function vincularBoton(idBoton, accion) {
+      const el = document.getElementById(idBoton);
+      if (!el) return;
+      el.onclick = function(e) {
         e.preventDefault();
-        callback();
-      });
-      
-      // Escucha el toque inmediato (Teléfono móvil) sin retrasos de pantalla
-      boton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        callback();
-      }, { passive: false });
+        accion();
+      };
     }
 
-    // ASOCIACIÓN DE COMPORTAMIENTOS A LAS PANTALLAS
-    
-    // Menú Principal -> Ir al Formulario
-    asociarAccion('btnIrRegistrar', () => {
-      cambiarPantalla('viewFormulario', "Abriendo formulario de registro.");
+    // Vinculación segura de flujos de pantallas
+    vincularBoton('btnIrRegistrar', () => {
+      actualizarDiagnostico();
+      cambiarPantalla('viewFormulario', "Abriendo formulario.");
     });
 
-    // Formulario -> Volver al Menú
-    asociarAccion('btnVolverMenu', () => {
-      cambiarPantalla('viewMenu', "Regresando al menú principal.");
+    vincularBoton('btnVolverMenu', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
     });
 
-    // Cancelar Confirmación -> Regresar al Formulario
-    asociarAccion('btnCancelarConfirmacion', () => {
-      cambiarPantalla('viewFormulario', "Retornando para corrección de datos.");
+    vincularBoton('btnCancelarConfirmacion', () => {
+      cambiarPantalla('viewFormulario', "Modificando datos.");
     });
 
-    // BOTÓN: ACEPTAR Y PROCESAR (SIMULACIÓN PRE-CÁLCULO)
-    asociarAccion('btnAceptarFalta', () => {
+    // ACCIÓN: SIMULAR FALTA
+    vincularBoton('btnAceptarFalta', () => {
       const nombre = document.getElementById('inputNombre').value;
       const causa = document.getElementById('inputCausa').value;
       const duracion = document.getElementById('inputDuracion').value;
@@ -394,7 +369,7 @@
       const observaciones = document.getElementById('inputObservaciones').value;
 
       if (!nombre || !duracion || !fechaInicio) {
-        alert("⚠️ Por favor complete todos los campos obligatorios (Persona, Duración y Fecha de Inicio).");
+        alert("⚠️ Por favor complete los campos requeridos: Persona, Duración y Fecha de Inicio.");
         return;
       }
 
@@ -407,23 +382,21 @@
       };
 
       document.getElementById('txtProgresoDinamico').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
-      cambiarPantalla('viewProcesando', "Iniciando fetch asíncrono de simulación.");
+      cambiarPantalla('viewProcesando', "Simulando...");
 
       fetch(URL_BACKEND, {
         method: "POST",
         mode: "cors", 
         redirect: "follow",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ 
           accion: "simular_falta", 
-          chatId: TELEGRAM_CHAT_ID, // 🔒 REQUISITO DEL BÚNKER DE SEGURIDAD GS
+          chatId: TELEGRAM_CHAT_ID, 
           datos: datosMemoriaOculta 
         })
       })
       .then(res => {
-        if (!res.ok) throw new Error("Respuesta de red no conforme.");
+        if (!res.ok) throw new Error("Error en respuesta de red.");
         return res.json();
       })
       .then(resJson => {
@@ -451,41 +424,38 @@
             divColision.innerText = "✅ LIBRE: Sin colisiones detectadas en el sistema.";
           }
 
-          cambiarPantalla('viewConfirmar', "Pre-cálculo renderizado con éxito.");
+          cambiarPantalla('viewConfirmar', "Resultados listos.");
         } else {
-          alert("Error del motor de cálculo: " + resJson.detalle);
-          cambiarPantalla('viewFormulario', "Error devuelto.");
+          alert("Error: " + resJson.detalle);
+          cambiarPantalla('viewFormulario', "Rebotado.");
         }
       })
       .catch(err => {
-        console.error("Detalle técnico del error:", err);
-        alert("Error de enlace de red: " + err.message);
-        cambiarPantalla('viewFormulario', "Fallo de red.");
+        alert("Error de red: " + err.message);
+        cambiarPantalla('viewFormulario', "Fallo.");
       });
     });
 
-    // BOTÓN: CONFIRMAR REGISTRO DEFINITIVO (ASENTAMIENTO PERMANENTE)
-    asociarAccion('btnGuardarDefinitivo', () => {
+    // ACCIÓN: ASENTAMIENTO DEFINITIVO
+    vincularBoton('btnGuardarDefinitivo', () => {
       if (!datosMemoriaOculta) return;
 
       document.getElementById('txtProgresoDinamico').innerText = "Asentando registro permanente en base de datos...";
-      cambiarPantalla('viewProcesando', "Iniciando fetch definitivo de escritura.");
+      cambiarPantalla('viewProcesando', "Guardando...");
 
       fetch(URL_BACKEND, {
         method: "POST",
         mode: "cors",
         redirect: "follow",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ 
           accion: "confirmar_falta", 
-          chatId: TELEGRAM_CHAT_ID, // 🔒 REQUISITO DEL BÚNKER DE SEGURIDAD GS
+          chatId: TELEGRAM_CHAT_ID, 
           datos: datosMemoriaOculta 
         })
       })
       .then(res => {
-        if (!res.ok) throw new Error("Respuesta de red no conforme.");
+        if (!res.ok) throw new Error("Error en respuesta de red.");
         return res.json();
       })
       .then(resJson => {
@@ -504,17 +474,16 @@
             document.getElementById('inputDuracion').value = "";
             document.getElementById('inputFechaInicio').value = "";
             document.getElementById('inputObservaciones').value = "";
-            cambiarPantalla('viewMenu', "Proceso completado.");
+            cambiarPantalla('viewMenu', "Completado.");
           }
         } else {
-          alert("Error al asentar el registro: " + resJson.detalle);
-          cambiarPantalla('viewConfirmar', "Regresando.");
+          alert("Error al guardar: " + resJson.detalle);
+          cambiarPantalla('viewConfirmar', "Fallo.");
         }
       })
       .catch(err => {
-        console.error("Detalle técnico del error:", err);
-        alert("Error de enlace de red al asentar: " + err.message);
-        cambiarPantalla('viewConfirmar', "Fallo de red.");
+        alert("Error de enlace: " + err.message);
+        cambiarPantalla('viewConfirmar', "Fallo.");
       });
     });
   </script>
