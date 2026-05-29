@@ -31,15 +31,9 @@
       position: relative;
     }
 
-    /* PANTALLAS (Por defecto ocultas, se controlan por JS) */
-    .view {
-      display: none;
-    }
-    .view.active {
-      display: block;
-    }
+    .view { display: none; }
+    .view.active { display: block; }
 
-    /* CABECERAS */
     h2 {
       color: var(--tg-theme-button-color, #5288c1);
       margin-top: 0;
@@ -64,80 +58,69 @@
       font-weight: 500;
     }
 
-    /* COMPONENTES DEL FORMULARIO */
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 14px;
       display: flex;
       flex-direction: column;
       text-align: left;
     }
 
-    label {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+    label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 
-    select, input[type="number"], input[type="date"], textarea {
-      width: 100%;
-      padding: 11px;
-      border-radius: 10px;
+    select, input, textarea {
+      width: 100%; padding: 11px; border-radius: 10px;
       border: 1px solid var(--tg-theme-hint-color, #444444);
       background-color: var(--tg-theme-bg-color, #181818);
       color: var(--tg-theme-text-color, #f5f5f5);
-      font-size: 14px;
-      box-sizing: border-box;
-      outline: none;
+      font-size: 14px; box-sizing: border-box; outline: none;
     }
+    select:focus, input:focus, textarea:focus { border-color: var(--tg-theme-button-color, #5288c1); }
+    textarea { resize: none; height: 65px; }
 
-    select:focus, input:focus, textarea:focus {
-      border-color: var(--tg-theme-button-color, #5288c1);
+    /* PANEL DE RESULTADOS DE SIMULACIÓN */
+    .resumen-box {
+      background-color: var(--tg-theme-bg-color, #1c1c1c);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+      text-align: left;
+      border: 1px solid #333;
     }
-
-    textarea {
-      resize: none;
-      height: 70px;
+    .resumen-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #2d2d2d;
+      padding: 8px 0;
+      font-size: 13px;
     }
+    .resumen-item:last-child { border: none; }
+    .resumen-label { font-weight: 600; color: #b0b0b0; }
+    .resumen-value { color: #ffffff; text-align: right; }
+    
+    /* ALERTAS DE COLISIÓN */
+    .alerta-colision {
+      padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      text-align: center; margin-bottom: 15px;
+    }
+    .colision-true { background-color: #782626; color: #ff9999; border: 1px solid #a83232; }
+    .colision-false { background-color: #1e3d22; color: #99ff99; border: 1px solid #2e6934; }
 
     /* BOTONES */
     .btn-main {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      margin: 12px 0;
+      display: block; width: 100%; padding: 14px; margin: 10px 0;
       background-color: var(--tg-theme-button-color, #2481cc);
       color: var(--tg-theme-button-text-color, #ffffff);
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      box-sizing: border-box;
+      border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
+      cursor: pointer; box-sizing: border-box;
     }
+    .btn-secondary { background-color: transparent; color: var(--tg-theme-hint-color, #aaaaaa); border: 1px solid var(--tg-theme-hint-color, #444444); }
+    .btn-danger { background-color: #a83232; color: #ffffff; }
+    .btn-main:active, .btn-secondary:active { opacity: 0.8; }
 
-    .btn-secondary {
-      background-color: transparent;
-      color: var(--tg-theme-hint-color, #aaaaaa);
-      border: 1px solid var(--tg-theme-hint-color, #444444);
-    }
-
-    .btn-main:active, .btn-secondary:active {
-      opacity: 0.8;
-    }
-
-    /* CONSOLA DE DIAGNÓSTICO */
     #consola {
-      width: 100%;
-      max-width: 420px;
-      margin-top: 16px;
-      padding: 12px;
-      background-color: #050505;
-      color: #00ff00;
-      font-family: monospace;
-      font-size: 11px;
-      border-radius: 8px;
-      box-sizing: border-box;
-      white-space: pre-wrap;
+      width: 100%; max-width: 420px; margin-top: 16px; padding: 12px;
+      background-color: #050505; color: #00ff00; font-family: monospace; font-size: 11px;
+      border-radius: 8px; box-sizing: border-box; white-space: pre-wrap;
     }
   </style>
 </head>
@@ -148,10 +131,8 @@
     <div id="viewMenu" class="view active">
       <h2 id="saludoMenu">¡Hola!</h2>
       <div class="subtitle">MiniApp de Gestión Administrativa</div>
-      
       <button class="btn-main" id="btnIrFaltas">📝 Registrar Falta</button>
     </div>
-
 
     <div id="viewFormFaltas" class="view">
       <div class="user-tag" id="userTagForm">Usuario: ---</div>
@@ -160,28 +141,20 @@
       
       <div class="form-group">
         <label for="selectNombre">👤 Nombre de la Persona:</label>
-        <select id="selectNombre">
-          <option value="">Cargando personal...</option>
-        </select>
+        <select id="selectNombre"><option value="">Cargando personal...</option></select>
       </div>
-
       <div class="form-group">
         <label for="selectCausa">📌 Causa / Tipo de Falta:</label>
-        <select id="selectCausa">
-          <option value="">Cargando causas...</option>
-        </select>
+        <select id="selectCausa"><option value="">Cargando causas...</option></select>
       </div>
-
       <div class="form-group">
         <label for="inputDuracion">⏳ Duración (Días):</label>
         <input type="number" id="inputDuracion" min="1" value="1">
       </div>
-
       <div class="form-group">
         <label for="inputFecha">📅 Fecha de Inicio:</label>
         <input type="date" id="inputFecha">
       </div>
-
       <div class="form-group">
         <label for="txtObservaciones">💬 Observaciones:</label>
         <textarea id="txtObservaciones" placeholder="Detalles adicionales o justificación..."></textarea>
@@ -191,128 +164,168 @@
       <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
     </div>
 
+    <div id="viewConfirmar" class="view">
+      <div class="user-tag" id="userTagConfirm">Usuario: ---</div>
+      <h2>Confirmar Registro</h2>
+      <div class="subtitle">Verifique los datos introducidos y los cálculos del sistema</div>
+      
+      <div id="statusColision"></div>
+      
+      <div class="resumen-box">
+        <div style="font-size: 11px; color: var(--tg-theme-button-color, #5288c1); font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Datos Introducidos</div>
+        
+        <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntro" style="font-weight: 600;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📌 Causa:</span><span class="resumen-value" id="valCausaIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">⏳ Duración Solicitada:</span><span class="resumen-value" id="valDuracionIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio Solicitada:</span><span class="resumen-value" id="valFechaIntro">--</span></div>
+        <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+          <span class="resumen-label">💬 Observaciones:</span>
+          <span id="valObsIntro" style="color: #e0e0e0; font-size: 12px; font-style: italic; word-break: break-word; padding-left: 4px;">--</span>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #444; margin: 14px 0;">
+
+        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Cálculos del Sistema (Sheets)</div>
+        
+        <div class="resumen-item"><span class="resumen-label">Fecha Inicio Sugerida:</span><span class="resumen-value" id="valFechaSug" style="color: #93c47d;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Fin Calculada:</span><span class="resumen-value" id="valFechaFin">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Siguiente Día Hábil:</span><span class="resumen-value" id="valSigHabil">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Siguiente Guardia:</span><span class="resumen-value" id="valSigGuardia">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Reincorporación:</span><span class="resumen-value" id="valFechaReinc" style="font-weight: 600; color: #5288c1;">--</span></div>
+      </div>
+      
+      <button class="btn-main" style="background-color:#2e6934;" id="btnGuardarDefinitivo">✅ Confirmar Registro Definitivo</button>
+      <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
+    </div>
+
   </div>
 
   <div id="consola">Iniciando sistema de navegación...</div>
 
   <script>
-    // URL real de tu WebApp de Google Apps Script (Sigue siendo la misma de ayer)
     const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
+    let datosMemoriaOculta = null; // Almacena temporalmente lo que el usuario escribió
 
     try {
       const tg = window.Telegram.WebApp;
-      tg.expand(); 
-      tg.ready();
+      tg.expand(); tg.ready();
 
-      // Capturar parámetros de la URL
       const urlParams = new URLSearchParams(window.location.search);
       const chatIdAsignado = urlParams.get('chatId') || "";
       const nombreAsignado = urlParams.get('nombre') || "Usuario";
       
-      // Inicializar textos de identidad
       document.getElementById('saludoMenu').innerText = "¡Hola, " + nombreAsignado + "!";
       document.getElementById('userTagForm').innerText = "Usuario: " + nombreAsignado;
-      
-      // Colocar fecha de hoy por defecto
+      document.getElementById('userTagConfirm').innerText = "Usuario: " + nombreAsignado;
       document.getElementById('inputFecha').value = new Date().toISOString().split('T')[0];
 
-      // ==========================================
-      // CONTROL DE NAVEGACIÓN (CAMBIO DE PANTALLAS)
-      // ==========================================
       function cambiarPantalla(pantallaId, mensajeConsola) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(pantallaId).classList.add('active');
         document.getElementById('consola').innerText = "Diagnóstico: " + mensajeConsola;
       }
 
-      // Eventos de los botones de navegación
-      document.getElementById('btnIrFaltas').addEventListener('click', () => {
-        cambiarPantalla('viewFormFaltas', "Módulo 'Registrar Falta' abierto.");
-      });
+      document.getElementById('btnIrFaltas').addEventListener('click', () => cambiarPantalla('viewFormFaltas', "Módulo 'Registrar Falta' abierto."));
+      document.getElementById('btnVolverMenu').addEventListener('click', () => cambiarPantalla('viewMenu', "Menú Principal activo."));
+      document.getElementById('btnCancelarConfirmacion').addEventListener('click', () => cambiarPantalla('viewFormFaltas', "Regresó al formulario. Cambios no guardados."));
 
-      document.getElementById('btnVolverMenu').addEventListener('click', () => {
-        cambiarPantalla('viewMenu', "Menú Principal activo.");
-      });
-
-      // ==========================================
-      // CONSULTA DE COMBOS A GOOGLE SHEETS
-      // ==========================================
+      // CARGAR COMBOS
       function cargarCombosDesdeGoogle() {
-        document.getElementById('consola').innerText = "Consultando listas al Sheets a través de mydoGet...";
-        
+        document.getElementById('consola').innerText = "Consultando listas al Sheets...";
         fetch(`${URL_BACKEND}?obtener=combos`)
-          .then(response => response.json())
+          .then(res => res.json())
           .then(data => {
             if (data.estatus === "OK") {
-              // Poblar Personal
               const selectNombre = document.getElementById('selectNombre');
               selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
-              data.personal.forEach(p => {
-                let opt = document.createElement('option');
-                opt.value = p; opt.textContent = p;
-                selectNombre.appendChild(opt);
-              });
+              data.personal.forEach(p => { let opt = document.createElement('option'); opt.value = p; opt.textContent = p; selectNombre.appendChild(opt); });
 
-              // Poblar Causas
               const selectCausa = document.getElementById('selectCausa');
               selectCausa.innerHTML = '<option value="">-- Seleccione la Causa --</option>';
-              data.causas.forEach(c => {
-                let opt = document.createElement('option');
-                opt.value = c; opt.textContent = c;
-                selectCausa.appendChild(opt);
-              });
+              data.causas.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectCausa.appendChild(opt); });
 
-              document.getElementById('consola').innerText = "Diagnóstico: Menú Principal cargado. Listas en caché listas para usarse.";
-            } else {
-              document.getElementById('consola').innerText = "Error: " + data.detalle;
+              document.getElementById('consola').innerText = "Diagnóstico: Menú Principal listo. Datos cargados.";
             }
-          })
-          .catch(err => {
-            document.getElementById('consola').innerText = "Error de enlace HTTP: " + err.message;
-          });
+          }).catch(err => document.getElementById('consola').innerText = "Error: " + err.message);
       }
-
-      // Cargar los combos en segundo plano apenas abra la MiniApp
       cargarCombosDesdeGoogle();
 
-      // ==========================================
-      // ENVÍO DE DATOS DEL FORMULARIO
-      // ==========================================
+      // BOTÓN: ACEPTAR Y PROCESAR (SIMULACIÓN)
       document.getElementById('btnAceptarFalta').addEventListener('click', function() {
-        const nombreSel = document.getElementById('selectNombre').value;
-        const causaSel = document.getElementById('selectCausa').value;
-        const duracionSel = document.getElementById('inputDuracion').value;
-        const fechaSel = document.getElementById('inputFecha').value;
-        const obsSel = document.getElementById('txtObservaciones').value;
+        const nombre = document.getElementById('selectNombre').value;
+        const causa = document.getElementById('selectCausa').value;
+        const duracion = document.getElementById('inputDuracion').value;
+        const fecha = document.getElementById('inputFecha').value;
+        const obs = document.getElementById('txtObservaciones').value;
 
-        if (!nombreSel || !causaSel || !duracionSel || !fechaSel) {
+        if (!nombre || !causa || !duracion || !fecha) {
           alert("Por favor, rellene todos los campos obligatorios.");
           return;
         }
 
-        try {
-          const paqueteFalta = {
-            accion: "registrar_falta_solicitud",
-            chatId: chatIdAsignado,
-            operador: nombreAsignado,
-            datos: {
-              nombre: nombreSel,
-              causa: causaSel,
-              duracion: parseInt(duracionSel, 10),
-              fechaInicio: fechaSel,
-              observaciones: obsSel
+        datosMemoriaOculta = { nombre, causa, duracion: parseInt(duracion,10), fechaInicio: fecha, observaciones: obs };
+        document.getElementById('consola').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
+
+        fetch(URL_BACKEND, {
+          method: "POST",
+          body: JSON.stringify({ accion: "simular_falta", datos: datosMemoriaOculta })
+        })
+        .then(res => res.json())
+        .then(resJson => {
+          if (resJson.estatus === "OK") {
+            // 1. MPEAR DATOS INTRODUCIDOS (NUEVO)
+            document.getElementById('valNombreIntro').innerText = datosMemoriaOculta.nombre;
+            document.getElementById('valCausaIntro').innerText = datosMemoriaOculta.causa;
+            document.getElementById('valDuracionIntro').innerText = datosMemoriaOculta.duracion + " día(s)";
+            // Cambiar formato visual de la fecha YYYY-MM-DD a DD/MM/YYYY para que combine con tu estilo de Sheets
+            const [year, month, day] = datosMemoriaOculta.fechaInicio.split('-');
+            document.getElementById('valFechaIntro').innerText = `${day}/${month}/${year}`;
+            document.getElementById('valObsIntro').innerText = datosMemoriaOculta.observaciones || "Sin observaciones.";
+
+            // 2. MAPEAR CÁLCULOS DE GOOGLE SHEETS
+            document.getElementById('valFechaSug').innerText = resJson.fechaInicioSugerida;
+            document.getElementById('valFechaFin').innerText = resJson.fechaFin;
+            document.getElementById('valSigHabil').innerText = resJson.siguienteDiaHabil;
+            document.getElementById('valSigGuardia').innerText = resJson.siguienteGuardia;
+            document.getElementById('valFechaReinc').innerText = resJson.fechaReincorporacion;
+
+            // Tratamiento visual de la Alerta de Colisión
+            const divColision = document.getElementById('statusColision');
+            if (resJson.colision === true || resJson.colision === "TRUE") {
+              divColision.className = "alerta-colision colision-true";
+              divColision.innerText = "⚠️ ADVERTENCIA: Se detectó colisión con otra falta de este operador.";
+            } else {
+              divColision.className = "alerta-colision colision-false";
+              divColision.innerText = "✅ LIBRE: Sin colisiones detectadas en el sistema.";
             }
-          };
-          
-          tg.sendData(JSON.stringify(paqueteFalta));
-        } catch (errBoton) {
-          document.getElementById('consola').innerText = "Error de envío: " + errBoton.message;
-        }
+
+            cambiarPantalla('viewConfirmar', "Pre-cálculo renderizado con éxito.");
+          } else {
+            alert("Error del motor de cálculo: " + resJson.detalle);
+          }
+        }).catch(err => alert("Error de enlace de red: " + err.message));
       });
 
-    } catch (errGeneral) {
-      alert("Error crítico: " + errGeneral.message);
-    }
+      // BOTÓN: CONFIRMAR DEFINITIVO (ASENTAMIENTO)
+      document.getElementById('btnGuardarDefinitivo').addEventListener('click', function() {
+        document.getElementById('consola').innerText = "Asentando registro permanente en la hoja Faltas...";
+        
+        fetch(URL_BACKEND, {
+          method: "POST",
+          body: JSON.stringify({ accion: "confirmar_falta", datos: datosMemoriaOculta })
+        })
+        .then(res => res.json())
+        .then(resJson => {
+          if (resJson.estatus === "OK") {
+            // Notificamos a Telegram el fin del proceso enviando un paquete de éxito para que el bot felicite en el chat
+            tg.sendData(JSON.stringify({ accion: "falta_asentada_exito", operador: nombreAsignado, personaAfectada: datosMemoriaOculta.nombre }));
+          } else {
+            alert("Error al asentar: " + resJson.detalle);
+          }
+        }).catch(err => alert("Error de red final: " + err.message));
+      });
+
+    } catch (errGeneral) { alert("Error crítico: " + errGeneral.message); }
   </script>
 </body>
 </html>
