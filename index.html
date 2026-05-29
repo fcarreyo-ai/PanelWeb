@@ -124,6 +124,7 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
+      -webkit-tap-highlight-color: transparent; /* Optimización táctil móvil */
     }
 
     .btn-secondary {
@@ -357,7 +358,7 @@
         })
         .catch(err => {
           cajaDiag.style.color = '#ff8a8a';
-          cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}\n\nVerifica los permisos de la macro.`;
+          cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}`;
         });
     });
 
@@ -368,14 +369,19 @@
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // MANEJADORES DE ACCIONES ULTRA-COMPATIBLES (MÓVIL Y PC)
+    // VINCULACIÓN COMPATIBLE 100% MÓVIL (SIN PREVENTDEFAULT DE CONTROL TÁCTIL)
     function vincularBoton(idBoton, accion) {
       const el = document.getElementById(idBoton);
       if (!el) return;
-      el.onclick = function(e) {
-        e.preventDefault();
+      
+      el.addEventListener('click', function() {
+        // Alerta visual de traza en la caja negra para certificar el toque físico
+        const caja = document.getElementById('diagnosticoCarga');
+        if (caja) {
+          caja.innerText += `\n👆 [Tap] Botón "${idBoton}" detectado con éxito.`;
+        }
         accion();
-      };
+      });
     }
 
     vincularBoton('btnIrRegistrar', () => {
