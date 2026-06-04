@@ -504,7 +504,7 @@
       document.querySelectorAll('#contenedorColumnas input[type="checkbox"]').forEach(chk => chk.checked = false);
     });
 
-    // VERIFICACIÓN DE CAMPOS SELECCIONADOS ANTES DE PASAR AL BACKEND (FASE 1)
+    // VERIFICACIÓN Y ENVÍO DE CAMPOS SELECCIONADOS AL BACKEND (FASE 2)
     vincularBoton('btnExportarExcel', () => {
       const seleccionados = [];
       document.querySelectorAll('#contenedorColumnas input[type="checkbox"]:checked').forEach(chk => {
@@ -516,11 +516,45 @@
         return;
       }
 
-      // Verificación de fase inicial limpia
-      alert(`📌 Estructura lista para procesar.\nCampos seleccionados: ${seleccionados.length} columnas.`);
-      console.log("Campos a exportar:", seleccionados);
-      
-      // Detenemos aquí tal como solicitaste, asegurando que la interfaz opere perfectamente.
+      // Cambiar a pantalla de procesamiento para dar feedback visual al usuario
+      document.getElementById('txtProgresoDinamico').innerText = "Generando archivo Excel con las columnas seleccionadas...";
+      cambiarPantalla('viewProcesando', "Procesando exportación de columnas...");
+
+      // Enviar la petición de exportación al backend
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+          accion: "exportar_excel", 
+          chatId: TELEGRAM_CHAT_ID, 
+          columnas: seleccionados 
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en la respuesta del servidor.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          alert("📊 ¡Listado generado! El archivo Excel ha sido enviado directamente a tu chat de Telegram.");
+          
+          // Si estamos en Telegram, cerramos la MiniApp automáticamente para dejar al usuario en su chat
+          if (tg) {
+            tg.close();
+          } else {
+            cambiarPantalla('viewMenu', "Exportación completada.");
+          }
+        } else {
+          alert("Error al exportar: " + resJson.detalle);
+          cambiarPantalla('viewListadoPersonal', "Fallo en exportación.");
+        }
+      })
+      .catch(err => {
+        alert("Error de enlace con el servidor: " + err.message);
+        cambiarPantalla('viewListadoPersonal', "Fallo de red.");
+      });
     });
 
     // ACCIÓN: SIMULAR FALTA
