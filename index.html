@@ -186,6 +186,39 @@
       color: #93c47d;
       font-weight: 500;
     }
+
+    /* NUEVOS ESTILOS AISLADOS PARA EL LISTADO DE PERSONAL */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .checkbox-group:last-child {
+      border-bottom: none;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--btn-primary);
+    }
+    .checkbox-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn-mini {
+      flex: 1;
+      padding: 6px;
+      font-size: 11px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -199,6 +232,10 @@
       
       <button class="btn-main" id="btnIrRegistrar" style="padding: 16px; font-size: 15px; margin-top: 30px;">
         📝 Registrar Falta
+      </button>
+
+      <button class="btn-main" id="btnIrListado" style="padding: 16px; font-size: 15px; margin-top: 12px; background-color: #38435a; border: 1px solid var(--input-border);">
+        📋 Listado del Personal
       </button>
       
       <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: left; border: 1px solid #222; white-space: pre-wrap; word-break: break-all;">
@@ -276,6 +313,24 @@
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
     </div>
 
+    <div id="viewListadoPersonal" class="view">
+      <div class="user-tag" id="userTagListado">Usuario: ---</div>
+      <h2>Listado del Personal</h2>
+      <div class="subtitle">Seleccione los campos para estructurar el archivo Excel</div>
+      
+      <div class="checkbox-actions">
+        <button class="btn-mini" id="btnMarcarTodos">☑️ Seleccionar Todos</button>
+        <button class="btn-mini" id="btnDesmarcarTodos">⬜ Desmarcar Todos</button>
+      </div>
+
+      <div id="contenedorColumnas" style="max-height: 240px; overflow-y: auto; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 10px; margin-bottom: 16px;">
+        <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Sincronizando campos de la hoja...</div>
+      </div>
+
+      <button class="btn-main" id="btnExportarExcel" style="background-color: #2e6934;">🚀 Exportar a Excel</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeListado">⬅️ Volver al Menú</button>
+    </div>
+
     <div id="viewProcesando" class="view">
       <h2>Conectando con Servidor</h2>
       <div class="subtitle" id="txtProgresoSub">Sincronizando flujos...</div>
@@ -312,22 +367,39 @@
 
     let datosMemoriaOculta = null;
 
-    // Pintar etiquetas de usuario
+    // Pintar etiquetas de usuario (Agregada la nueva etiqueta)
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagListado').innerText = "Usuario: " + TELEGRAM_USER_NAME;
 
     // 2. CONEXIÓN DINÁMICA CON TU MYDOGET DE GOOGLE SHEETS
     document.addEventListener("DOMContentLoaded", () => {
       const cajaDiag = document.getElementById('diagnosticoCarga');
-      cajaDiag.innerText = "📡 Conectando al servidor para sincronizar operadores y causas...";
+      cajaDiag.innerText = "📡 Conectando al servidor para verificar credenciales y sincronizar...";
 
-      fetch(`${URL_BACKEND}?obtener=combos`)
+      // ENVIAMOS EL CHAT_ID AL BACKEND PARA VALIDAR DESDE EL INICIO
+      fetch(`${URL_BACKEND}?obtener=combos&chatId=${TELEGRAM_CHAT_ID}`)
         .then(res => {
           if (!res.ok) throw new Error("La red no respondió correctamente.");
           return res.json();
         })
         .then(data => {
+          // REBOTE ESTRICTO DE SEGURIDAD SI NO ESTÁ AUTORIZADO
+          if (data.autorizado === false || data.estatus === "ACCESO_DENEGADO") {
+            document.querySelector('.container').innerHTML = `
+              <div style="text-align: center; padding: 40px 10px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🚫</div>
+                <h2 style="color: var(--error); margin-bottom: 8px;">Acceso Denegado</h2>
+                <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">
+                  Tu identificador (${TELEGRAM_CHAT_ID}) no posee los privilegios requeridos.<br><br>
+                  Usa exclusivamente el bot de Telegram configurado.
+                </p>
+              </div>
+            `;
+            throw new Error("Acceso revocado por políticas de seguridad.");
+          }
+
           if (data.estatus === "OK") {
             const selectNombre = document.getElementById('inputNombre');
             const selectCausa = document.getElementById('inputCausa');
@@ -349,16 +421,35 @@
               selectCausa.appendChild(opt);
             });
 
+            // INYECTAR DINÁMICAMENTE LAS MÁS DE 30 COLUMNAS PROVENIENTES DE LA HOJA 'PERSONAS'
+            const contenedorCol = document.getElementById('contenedorColumnas');
+            if (contenedorCol && data.columnas && data.columnas.length > 0) {
+              contenedorCol.innerHTML = '';
+              data.columnas.forEach((col, index) => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                  <input type="checkbox" id="chk_col_${index}" value="${col}" checked>
+                  <label for="chk_col_${index}" style="margin-bottom: 0; font-weight: normal; font-size: 13px; cursor: pointer; flex: 1;">${col}</label>
+                `;
+                contenedorCol.appendChild(div);
+              });
+            } else if (contenedorCol) {
+              contenedorCol.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 10px;">⚠️ No se encontraron columnas en la hoja.</div>';
+            }
+
             // Imprimir éxito en la caja negra
             cajaDiag.style.color = '#0f0';
-            cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• ChatID Supervisor: ${TELEGRAM_CHAT_ID}`;
+            cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
           } else {
             throw new Error(data.detalle || "Error desconocido del backend.");
           }
         })
         .catch(err => {
-          cajaDiag.style.color = '#ff8a8a';
-          cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}`;
+          if (cajaDiag) {
+            cajaDiag.style.color = '#ff8a8a';
+            cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}`;
+          }
         });
     });
 
@@ -369,13 +460,12 @@
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // VINCULACIÓN COMPATIBLE 100% MÓVIL (SIN PREVENTDEFAULT DE CONTROL TÁCTIL)
+    // VINCULACIÓN COMPATIBLE 100% MÓVIL
     function vincularBoton(idBoton, accion) {
       const el = document.getElementById(idBoton);
       if (!el) return;
       
       el.addEventListener('click', function() {
-        // Alerta visual de traza en la caja negra para certificar el toque físico
         const caja = document.getElementById('diagnosticoCarga');
         if (caja) {
           caja.innerText += `\n👆 [Tap] Botón "${idBoton}" detectado con éxito.`;
@@ -394,6 +484,43 @@
 
     vincularBoton('btnCancelarConfirmacion', () => {
       cambiarPantalla('viewFormulario', "Modificando datos.");
+    });
+
+    // ENRUTAMIENTO DEL NUEVO MÓDULO DE LISTADO
+    vincularBoton('btnIrListado', () => {
+      cambiarPantalla('viewListadoPersonal', "Abriendo selección de campos para listado.");
+    });
+
+    vincularBoton('btnVolverMenuDesdeListado', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
+    });
+
+    // LÓGICA DE BOTONES DE MARCAR Y DESMARCAR RAPIDAMENTE
+    document.getElementById('btnMarcarTodos').addEventListener('click', () => {
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]').forEach(chk => chk.checked = true);
+    });
+
+    document.getElementById('btnDesmarcarTodos').addEventListener('click', () => {
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]').forEach(chk => chk.checked = false);
+    });
+
+    // VERIFICACIÓN DE CAMPOS SELECCIONADOS ANTES DE PASAR AL BACKEND (FASE 1)
+    vincularBoton('btnExportarExcel', () => {
+      const seleccionados = [];
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]:checked').forEach(chk => {
+        seleccionados.push(chk.value);
+      });
+
+      if (seleccionados.length === 0) {
+        alert("⚠️ Por favor, seleccione al menos un campo para armar el listado.");
+        return;
+      }
+
+      // Verificación de fase inicial limpia
+      alert(`📌 Estructura lista para procesar.\nCampos seleccionados: ${seleccionados.length} columnas.`);
+      console.log("Campos a exportar:", seleccionados);
+      
+      // Detenemos aquí tal como solicitaste, asegurando que la interfaz opere perfectamente.
     });
 
     // ACCIÓN: SIMULAR FALTA
