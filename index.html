@@ -239,7 +239,7 @@
       </button>
       
       <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: left; border: 1px solid #222; white-space: pre-wrap; word-break: break-all;">
-        Diagnóstico: Inicializando y conectando con el Telepuerto...
+        Diagnóstico: Inicializando y conectando...
       </div>
     </div>
 
@@ -292,8 +292,8 @@
         <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Datos Introducidos</div>
         <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntro" style="font-weight: 600;">--</span></div>
         <div class="resumen-item"><span class="resumen-label">📌 Causa:</span><span class="resumen-value" id="valCausaIntro">--</span></div>
-        <div class="resumen-item"><span class="resumen-label">⏳ Duración Solicitada:</span><span class="resumen-value" id="valDuracionIntro">--</span></div>
-        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio Solicitada:</span><span class="resumen-value" id="valFechaIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">⏳ Duración:</span><span class="resumen-value" id="valDuracionIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio:</span><span class="resumen-value" id="valFechaIntro">--</span></div>
         <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
           <span class="resumen-label">💬 Observaciones:</span>
           <span id="valObsIntro" style="color: #e0e0e0; font-size: 12px; font-style: italic;">--</span>
@@ -333,7 +333,7 @@
 
     <div id="viewProcesando" class="view">
       <h2>Conectando con Servidor</h2>
-      <div class="subtitle" id="txtProgresoSub">Sincronizando flujos...</div>
+      <div class="subtitle" id="txtProgresoSub">Sincronizando...</div>
       <div class="loading-box" id="txtProgresoDinamico">
         Procesando, por favor espere...
       </div>
@@ -413,8 +413,7 @@
                 <div style="font-size: 48px; margin-bottom: 16px;">🚫</div>
                 <h2 style="color: var(--error); margin-bottom: 8px;">Acceso Denegado</h2>
                 <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">
-                  Tu identificador (${TELEGRAM_CHAT_ID}) no posee los privilegios requeridos.<br><br>
-                  Usa exclusivamente el bot de Telegram configurado.
+                  No posees los privilegios requeridos.
                 </p>
               </div>
             `;
