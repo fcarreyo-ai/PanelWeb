@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PanelWeb de Gestión de Guardias</title>
+  <title>PanelWeb</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -225,7 +225,16 @@
 
   <div class="container">
     
-    <div id="viewMenu" class="view active">
+    <div id="viewVerificando" class="view active">
+      <h2>Verificando Identidad</h2>
+      <div class="subtitle">PanelWeb</div>
+      <div class="loading-box" style="color: var(--btn-primary); padding: 40px 0;">
+        <div style="font-size: 36px; margin-bottom: 14px;">🔒</div>
+        Validando nivel de autorización en el sistema...
+      </div>
+    </div>
+    
+    <div id="viewMenu" class="view">
       <div class="user-tag" id="userTagMenu">Usuario: ---</div>
       <h2 id="saludoUsuario">¡Hola!</h2>
       <div class="subtitle">PanelWeb de Gestión de Guardias</div>
@@ -458,14 +467,29 @@
               contenedorCol.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 10px;">⚠️ No se encontraron columnas en la hoja.</div>';
             }
 
-            // Imprimir éxito en la caja negra
-            cajaDiag.style.color = '#0f0';
-            cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+            if (cajaDiag) {
+              cajaDiag.style.color = '#0f0';
+              cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+            }
+
+            // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
+            cambiarPantalla('viewMenu', "Acceso verificado y base de datos cargada.");
           } else {
             throw new Error(data.detalle || "Error desconocido del backend.");
           }
         })
         .catch(err => {
+          // Si falla la red, mutamos la pantalla de carga para avisarle directo al operador
+          const viewVerif = document.getElementById('viewVerificando');
+          if (viewVerif) {
+            viewVerif.innerHTML = `
+              <h2 style="color: var(--error);">❌ Error de Conexión</h2>
+              <div class="subtitle">No se pudo enlazar con la base de datos</div>
+              <div class="loading-box" style="color: #ff8a8a; font-size: 12px; font-family: monospace; text-align: left; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; line-height: 1.4;">
+                ${err.message}<br><br>Por favor, cierra la MiniApp e intenta de nuevo.
+              </div>
+            `;
+          }
           if (cajaDiag) {
             cajaDiag.style.color = '#ff8a8a';
             cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}`;
