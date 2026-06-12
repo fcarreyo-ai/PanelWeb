@@ -372,8 +372,6 @@
       }
       if (!TELEGRAM_USER_NAME && tg.initDataUnsafe.user.first_name) {
         TELEGRAM_USER_NAME = tg.initDataUnsafe.user.first_name;
-        if (tg.initDataUnsafe.user.last_name) {
-          TELEGRAM_USER_NAME += " " + tg.initDataUnsafe.user.last_name;
         }
       }
     }
