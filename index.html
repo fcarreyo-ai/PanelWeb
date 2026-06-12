@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Gestión de Guardias 2026</title>
+  <title>PanelWeb de Gestión de Guardias</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -227,8 +227,8 @@
     
     <div id="viewMenu" class="view active">
       <div class="user-tag" id="userTagMenu">Usuario: ---</div>
-      <h2 style="margin-top: 25px;">¡Hola, Frankgel!</h2>
-      <div class="subtitle">Panel de Gestión de Guardias 2026</div>
+      <h2 id="saludoUsuario" style="margin-top: 25px;">¡Hola!</h2>
+      <div class="subtitle">PanelWeb de Gestión de Guardias</div>
       
       <button class="btn-main" id="btnIrRegistrar" style="padding: 16px; font-size: 15px; margin-top: 30px;">
         📝 Registrar Falta
@@ -372,6 +372,9 @@
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagListado').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+
+    // Actualizar saludo dinámicamente con el nombre del usuario conectado
+    document.getElementById('saludoUsuario').innerText = "¡Hola, " + TELEGRAM_USER_NAME + "!";    
 
     // 2. CONEXIÓN DINÁMICA CON TU MYDOGET DE GOOGLE SHEETS
     document.addEventListener("DOMContentLoaded", () => {
