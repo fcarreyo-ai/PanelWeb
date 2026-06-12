@@ -359,8 +359,29 @@
     }
 
     const paramsUrl = new URLSearchParams(window.location.search);
-    const TELEGRAM_CHAT_ID = paramsUrl.get("chatId") || "ID_DESCONOCIDO";
-    const TELEGRAM_USER_NAME = paramsUrl.get("nombre") || "Operador";
+
+
+// Cambiamos a variables dinámicas para permitir la extracción segura desde la API nativa de Telegram
+    let TELEGRAM_CHAT_ID = paramsUrl.get("chatId");
+    let TELEGRAM_USER_NAME = paramsUrl.get("nombre");
+
+    // SOLUCIÓN AL BOTÓN DE ABRIR DIRECTO: Si la URL no trae datos, los saca del contexto nativo de la app
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      if (!TELEGRAM_CHAT_ID && tg.initDataUnsafe.user.id) {
+        TELEGRAM_CHAT_ID = tg.initDataUnsafe.user.id.toString();
+      }
+      if (!TELEGRAM_USER_NAME && tg.initDataUnsafe.user.first_name) {
+        TELEGRAM_USER_NAME = tg.initDataUnsafe.user.first_name;
+        if (tg.initDataUnsafe.user.last_name) {
+          TELEGRAM_USER_NAME += " " + tg.initDataUnsafe.user.last_name;
+        }
+      }
+    }
+
+    // Respaldos finales si el entorno no es Telegram o falla completamente la detección
+    TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID || "ID_DESCONOCIDO";
+    TELEGRAM_USER_NAME = TELEGRAM_USER_NAME || "Operador";
+    
 
     // URL invariable de tu WebApp de Google
     const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
