@@ -253,7 +253,11 @@
 
       <button class="btn-main" id="btnIrListado" style="padding: 16px; font-size: 15px; margin-top: 12px;">
         📋 Listado del Personal
-      </button>
+	  </button>
+	
+      <button class="btn-main btn-secondary" id="btnSalirApp" style="padding: 16px; font-size: 15px; margin-top: 12px;">
+        🚪 Salir
+      </button>			
       
       <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: left; border: 1px solid #222; white-space: pre-wrap; word-break: break-all;">
         Diagnóstico: Inicializando y conectando...
@@ -629,7 +633,13 @@
 
     vincularBoton('btnVolverMenuDesdeListado', () => {
       cambiarPantalla('viewMenu', "Regresando al menú.");
-    });
+    vincularBoton('btnSalirApp', () => {
+      if (tg) {
+        tg.close();
+      } else {
+        alert("Cerrando aplicación (entorno web fuera de Telegram).");
+      }
+    });	
 
     // LÓGICA DE BOTONES DE MARCAR Y DESMARCAR RAPIDAMENTE
     document.getElementById('btnMarcarTodos').addEventListener('click', () => {
@@ -676,12 +686,7 @@
         if (resJson.estatus === "OK") {
           alert("📊 ¡Listado generado! El archivo Excel ha sido enviado directamente a tu chat de Telegram.");
           
-          // Si estamos en Telegram, cerramos la MiniApp automáticamente para dejar al usuario en su chat
-          if (tg) {
-            tg.close();
-          } else {
-            cambiarPantalla('viewMenu', "Exportación completada.");
-          }
+          cambiarPantalla('viewMenu', "Exportación completada.");
         } else {
           alert("Error al exportar: " + resJson.detalle);
           cambiarPantalla('viewListadoPersonal', "Fallo en exportación.");
@@ -793,23 +798,15 @@
       })
       .then(resJson => {
         if (resJson.estatus === "OK") {
-          alert("¡Registro guardado con éxito en Google Sheets!");
+			alert("¡Registro guardado con éxito en Google Sheets!");
           
-          if (tg) {
-            tg.sendData(JSON.stringify({
-              accion: "falta_asentada_exito",
-              operador: TELEGRAM_USER_NAME,
-              personaAfectada: datosMemoriaOculta.nombre
-            }));
-            tg.close();
-          } else {
-            document.getElementById('inputNombre').value = "";
-            document.getElementById('inputCausa').value = "";
-            document.getElementById('inputDuracion').value = "";
-            document.getElementById('inputFechaInicio').value = "";
-            document.getElementById('inputObservaciones').value = "";
-            cambiarPantalla('viewMenu', "Completado.");
-          }
+			document.getElementById('inputNombre').value = "";
+			document.getElementById('inputCausa').value = "";
+			document.getElementById('inputDuracion').value = "";
+			document.getElementById('inputFechaInicio').value = "";
+			document.getElementById('inputObservaciones').value = "";
+			cambiarPantalla('viewMenu', "Completado.");
+
         } else {
           alert("Error al guardar: " + resJson.detalle);
           cambiarPantalla('viewConfirmar', "Fallo.");
@@ -920,20 +917,12 @@
         if (resJson.estatus === "OK") {
           alert("¡Inclusión temporal guardada con éxito!");
           
-          if (tg) {
-            tg.sendData(JSON.stringify({
-              accion: "inclusion_asentada_exito",
-              operador: TELEGRAM_USER_NAME,
-              personaAfectada: datosMemoriaInclusion.nombre
-            }));
-            tg.close();
-          } else {
-            document.getElementById('inputNombreInclusion').value = "";
-            document.getElementById('inputDuracionInclusion').value = "";
-            document.getElementById('inputFechaInicioInclusion').value = "";
-            document.getElementById('inputObservacionesInclusion').value = "";
-            cambiarPantalla('viewMenu', "Completado.");
-          }
+			document.getElementById('inputNombreInclusion').value = "";
+			document.getElementById('inputDuracionInclusion').value = "";
+			document.getElementById('inputFechaInicioInclusion').value = "";
+			document.getElementById('inputObservacionesInclusion').value = "";
+			cambiarPantalla('viewMenu', "Completado.");
+
         } else {
           alert("Error al asentar registro: " + resJson.detalle);
           cambiarPantalla('viewConfirmarInclusion', "Fallo.");
