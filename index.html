@@ -243,6 +243,14 @@
         📝 Registrar Falta
       </button>
 
+      <button class="btn-main" id="btnIrInclusion" style="padding: 16px; font-size: 15px; margin-top: 12px;">
+        ➕ Registrar Inclusión
+      </button>
+
+      <button class="btn-main" id="btnIrCambioGuardia" style="padding: 16px; font-size: 15px; margin-top: 12px; opacity: 0.75;">
+        🔄 Cambio de Guardia
+      </button>
+
       <button class="btn-main" id="btnIrListado" style="padding: 16px; font-size: 15px; margin-top: 12px;">
         📋 Listado del Personal
       </button>
@@ -322,6 +330,64 @@
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
     </div>
 
+    <div id="viewFormularioInclusion" class="view">
+      <div class="user-tag" id="userTagFormInclusion">Usuario: ---</div>
+      <h2>Registrar Inclusión</h2>
+      <div class="subtitle">Registro de inclusiones temporales del personal</div>
+      
+      <div class="form-group">
+        <label>👤 Nombre de la Persona:</label>
+        <select id="inputNombreInclusion">
+          <option value="">-- Cargando Personal --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>⏳ Duración (Días):</label>
+        <input type="number" id="inputDuracionInclusion" min="1" placeholder="Ej. 5">
+      </div>
+      
+      <div class="form-group">
+        <label>📅 Fecha de Inicio:</label>
+        <input type="date" id="inputFechaInicioInclusion">
+      </div>
+      
+      <div class="form-group">
+        <label>💬 Observaciones:</label>
+        <textarea id="inputObservacionesInclusion" placeholder="Detalles adicionales de la inclusión..."></textarea>
+      </div>
+      
+      <button class="btn-main" id="btnAceptarInclusion">🚀 Aceptar y Procesar</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeInclusion">⬅️ Volver al Menú</button>
+    </div>
+
+    <div id="viewConfirmarInclusion" class="view">
+      <div class="user-tag" id="userTagConfirmInclusion">Usuario: ---</div>
+      <h2>Confirmar Inclusión</h2>
+      <div class="subtitle">Verifique los datos introducidos y los cálculos del sistema</div>
+      
+      <div id="statusNoEsSuGuardia"></div>
+      
+      <div class="resumen-box">
+        <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Datos Introducidos</div>
+        <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntroInclusion" style="font-weight: 600;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">⏳ Duración:</span><span class="resumen-value" id="valDuracionIntroInclusion">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio:</span><span class="resumen-value" id="valFechaIntroInclusion">--</span></div>
+        <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+          <span class="resumen-label">💬 Observaciones:</span>
+          <span id="valObsIntroInclusion" style="color: #e0e0e0; font-size: 12px; font-style: italic;">--</span>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #444; margin: 14px 0;">
+
+        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Cálculos del Sistema (Sheets)</div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Fin Inclusión:</span><span class="resumen-value" id="valFechaFinInclusion" style="font-weight: 600; color: var(--btn-primary);">--</span></div>
+      </div>
+      
+      <button class="btn-main" style="background-color: #2e6934;" id="btnGuardarInclusionDefinitivo">✅ Confirmar Registro Definitivo</button>
+      <button class="btn-main btn-secondary" id="btnCancelarConfirmacionInclusion">❌ Modificar / Cancelar</button>
+    </div>
+
     <div id="viewListadoPersonal" class="view">
       <div class="user-tag" id="userTagListado">Usuario: ---</div>
       <h2>Listado del Personal</h2>
@@ -369,8 +435,7 @@
 
     const paramsUrl = new URLSearchParams(window.location.search);
 
-
-// Cambiamos a variables dinámicas para permitir la extracción segura desde la API nativa de Telegram
+    // Cambiamos a variables dinámicas para permitir la extracción segura desde la API nativa de Telegram
     let TELEGRAM_CHAT_ID = paramsUrl.get("chatId");
     let TELEGRAM_USER_NAME = paramsUrl.get("nombre");
 
@@ -388,16 +453,18 @@
     TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID || "ID_DESCONOCIDO";
     TELEGRAM_USER_NAME = TELEGRAM_USER_NAME || "Operador";
     
-
     // URL invariable de tu WebApp de Google
     const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
 
     let datosMemoriaOculta = null;
+    let datosMemoriaInclusion = null;
 
-    // Pintar etiquetas de usuario (Agregada la nueva etiqueta)
+    // Pintar etiquetas de usuario
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagFormInclusion').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagConfirmInclusion').innerText = "Usuario: " + TELEGRAM_USER_NAME;
     document.getElementById('userTagListado').innerText = "Usuario: " + TELEGRAM_USER_NAME;
 
     // Actualizar saludo dinámicamente con el nombre del usuario conectado
@@ -431,15 +498,24 @@
 
           if (data.estatus === "OK") {
             const selectNombre = document.getElementById('inputNombre');
+            const selectNombreInclusion = document.getElementById('inputNombreInclusion');
             const selectCausa = document.getElementById('inputCausa');
 
-            // Limpiar e inyectar datos reales de tu base de datos
+            // Limpiar e inyectar datos reales de tu base de datos (Faltas)
             selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+            // Limpiar e inyectar datos reales para Inclusiones Temporales
+            selectNombreInclusion.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+
             data.personal.forEach(p => {
-              const opt = document.createElement('option');
-              opt.value = p;
-              opt.innerText = p;
-              selectNombre.appendChild(opt);
+              const opt1 = document.createElement('option');
+              opt1.value = p;
+              opt1.innerText = p;
+              selectNombre.appendChild(opt1);
+
+              const opt2 = document.createElement('option');
+              opt2.value = p;
+              opt2.innerText = p;
+              selectNombreInclusion.appendChild(opt2);
             });
 
             selectCausa.innerHTML = '<option value="">-- Seleccione Causa --</option>';
@@ -519,15 +595,31 @@
     }
 
     vincularBoton('btnIrRegistrar', () => {
-      cambiarPantalla('viewFormulario', "Abriendo formulario.");
+      cambiarPantalla('viewFormulario', "Abriendo formulario de faltas.");
+    });
+
+    vincularBoton('btnIrInclusion', () => {
+      cambiarPantalla('viewFormularioInclusion', "Abriendo formulario de inclusiones.");
+    });
+
+    vincularBoton('btnIrCambioGuardia', () => {
+      alert("🔄 Módulo Cambio de Guardia:\nPróximamente en la siguiente fase de desarrollo paso a paso.");
     });
 
     vincularBoton('btnVolverMenu', () => {
       cambiarPantalla('viewMenu', "Regresando al menú.");
     });
 
+    vincularBoton('btnVolverMenuDesdeInclusion', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
+    });
+
     vincularBoton('btnCancelarConfirmacion', () => {
       cambiarPantalla('viewFormulario', "Modificando datos.");
+    });
+
+    vincularBoton('btnCancelarConfirmacionInclusion', () => {
+      cambiarPantalla('viewFormularioInclusion', "Modificando datos de inclusión.");
     });
 
     // ENRUTAMIENTO DEL NUEVO MÓDULO DE LISTADO
@@ -623,7 +715,7 @@
       };
 
       document.getElementById('txtProgresoDinamico').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
-      cambiarPantalla('viewProcesando', "Simulando...");
+      cambiarPantalla('viewProcesando', "Simulando falta...");
 
       fetch(URL_BACKEND, {
         method: "POST",
@@ -677,12 +769,12 @@
       });
     });
 
-    // ACCIÓN: ASENTAMIENTO DEFINITIVO
+    // ACCIÓN: ASENTAMIENTO DEFINITIVO DE FALTA
     vincularBoton('btnGuardarDefinitivo', () => {
       if (!datosMemoriaOculta) return;
 
       document.getElementById('txtProgresoDinamico').innerText = "Asentando registro permanente en base de datos...";
-      cambiarPantalla('viewProcesando', "Guardando...");
+      cambiarPantalla('viewProcesando', "Guardando falta...");
 
       fetch(URL_BACKEND, {
         method: "POST",
@@ -712,6 +804,7 @@
             tg.close();
           } else {
             document.getElementById('inputNombre').value = "";
+            document.getElementById('inputCausa').value = "";
             document.getElementById('inputDuracion').value = "";
             document.getElementById('inputFechaInicio').value = "";
             document.getElementById('inputObservaciones').value = "";
@@ -725,6 +818,130 @@
       .catch(err => {
         alert("Error de enlace: " + err.message);
         cambiarPantalla('viewConfirmar', "Fallo.");
+      });
+    });
+
+    // ACCIÓN: SIMULAR INCLUSIÓN TEMPORAL
+    vincularBoton('btnAceptarInclusion', () => {
+      const nombre = document.getElementById('inputNombreInclusion').value;
+      const duracion = document.getElementById('inputDuracionInclusion').value;
+      const fechaInicio = document.getElementById('inputFechaInicioInclusion').value;
+      const observaciones = document.getElementById('inputObservacionesInclusion').value;
+
+      if (!nombre || !duracion || !fechaInicio) {
+        alert("⚠️ Por favor complete los campos requeridos: Persona, Duración y Fecha de Inicio.");
+        return;
+      }
+
+      datosMemoriaInclusion = {
+        nombre: nombre,
+        duracion: parseInt(duracion, 10),
+        fechaInicio: fechaInicio,
+        observaciones: observaciones
+      };
+
+      document.getElementById('txtProgresoDinamico').innerText = "Procesando validación en Google Sheets, por favor espere...";
+      cambiarPantalla('viewProcesando', "Simulando inclusión...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          accion: "simular_inclusion",
+          chatId: TELEGRAM_CHAT_ID,
+          datos: datosMemoriaInclusion
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en respuesta del servidor.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          document.getElementById('valNombreIntroInclusion').innerText = datosMemoriaInclusion.nombre;
+          document.getElementById('valDuracionIntroInclusion').innerText = datosMemoriaInclusion.duracion + " día(s)";
+          
+          const [year, month, day] = datosMemoriaInclusion.fechaInicio.split('-');
+          document.getElementById('valFechaIntroInclusion').innerText = `${day}/${month}/${year}`;
+          document.getElementById('valObsIntroInclusion').innerText = datosMemoriaInclusion.observaciones || "Sin observaciones.";
+
+          document.getElementById('valFechaFinInclusion').innerText = resJson.fechaFin;
+
+          const divNoEsSuGuardia = document.getElementById('statusNoEsSuGuardia');
+          const btnGuardarDefinitivoInclusion = document.getElementById('btnGuardarInclusionDefinitivo');
+
+          if (resJson.noEsSuGuardia === true || resJson.noEsSuGuardia === "TRUE") {
+            divNoEsSuGuardia.className = "alerta-colision colision-false";
+            divNoEsSuGuardia.innerText = "✅ PROCEDE: La fecha seleccionada no interfiere con su rol regular.";
+            btnGuardarDefinitivoInclusion.style.display = "flex"; // Habilitar el botón si cumple la condición
+          } else {
+            divNoEsSuGuardia.className = "alerta-colision colision-true";
+            divNoEsSuGuardia.innerText = "❌ OPERACIÓN BLOQUEADA: El operador ya tiene asignada una guardia para esta fecha. No se puede realizar una inclusión temporal.";
+            btnGuardarDefinitivoInclusion.style.display = "none"; // Ocultar de raíz el botón de confirmación
+          }
+
+          cambiarPantalla('viewConfirmarInclusion', "Verificación de inclusión lista.");
+        } else {
+          alert("Error del backend: " + resJson.detalle);
+          cambiarPantalla('viewFormularioInclusion', "Rebotado.");
+        }
+      })
+      .catch(err => {
+        alert("Error de red: " + err.message);
+        cambiarPantalla('viewFormularioInclusion', "Fallo.");
+      });
+    });
+
+    // ACCIÓN: ASENTAMIENTO DEFINITIVO DE INCLUSIÓN TEMPORAL
+    vincularBoton('btnGuardarInclusionDefinitivo', () => {
+      if (!datosMemoriaInclusion) return;
+
+      document.getElementById('txtProgresoDinamico').innerText = "Guardando inclusión temporal de manera permanente...";
+      cambiarPantalla('viewProcesando', "Asentando inclusión...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          accion: "confirmar_inclusion",
+          chatId: TELEGRAM_CHAT_ID,
+          datos: datosMemoriaInclusion
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error de respuesta.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          alert("¡Inclusión temporal guardada con éxito!");
+          
+          if (tg) {
+            tg.sendData(JSON.stringify({
+              accion: "inclusion_asentada_exito",
+              operador: TELEGRAM_USER_NAME,
+              personaAfectada: datosMemoriaInclusion.nombre
+            }));
+            tg.close();
+          } else {
+            document.getElementById('inputNombreInclusion').value = "";
+            document.getElementById('inputDuracionInclusion').value = "";
+            document.getElementById('inputFechaInicioInclusion').value = "";
+            document.getElementById('inputObservacionesInclusion').value = "";
+            cambiarPantalla('viewMenu', "Completado.");
+          }
+        } else {
+          alert("Error al asentar registro: " + resJson.detalle);
+          cambiarPantalla('viewConfirmarInclusion', "Fallo.");
+        }
+      })
+      .catch(err => {
+        alert("Error de enlace: " + err.message);
+        cambiarPantalla('viewConfirmarInclusion', "Fallo.");
       });
     });
   </script>
