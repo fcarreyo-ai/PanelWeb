@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PanelWeb</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: #181c26;
+      --card-bg: #222733;
+      --text-color: #f5f6f7;
+      --text-secondary: #8b95a5;
+      --btn-primary: #5288c1;
+      --btn-primary-hover: #6299d2;
+      --input-bg: #1c202b;
+      --input-border: #303746;
+      --success: #2e6934;
+      --error: #a63a3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .user-tag {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.05);
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 6px;
+      color: var(--btn-primary);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-color);
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      color: var(--text-color);
+      font-size: 14px;
+      outline: none;
+    }
+
+    textarea {
+      resize: none;
+      height: 70px;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--btn-primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      -webkit-tap-highlight-color: transparent; /* Optimización táctil móvil */
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .resumen-box {
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .resumen-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .resumen-label {
+      color: var(--text-secondary);
+    }
+
+    .resumen-value {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .alerta-colision {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .colision-true {
+      background-color: rgba(166, 58, 58, 0.15);
+      border: 1px solid var(--error);
+      color: #ff8a8a;
+    }
+
+    .colision-false {
+      background-color: rgba(46, 105, 52, 0.15);
+      border: 1px solid var(--success);
+      color: #93c47d;
+    }
+
+    .loading-box {
+      text-align: center;
+      padding: 20px 0;
+      font-size: 13px;
+      color: #93c47d;
+      font-weight: 500;
+    }
+
+    /* NUEVOS ESTILOS AISLADOS PARA EL LISTADO DE PERSONAL */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .checkbox-group:last-child {
+      border-bottom: none;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--btn-primary);
+    }
+    .checkbox-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn-mini {
+      flex: 1;
+      padding: 6px;
+      font-size: 11px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <div id="viewVerificando" class="view active">
+      <h2>Verificando Identidad</h2>
+      <div class="subtitle">PanelWeb</div>
+      <div class="loading-box" style="color: var(--btn-primary); padding: 40px 0;">
+        <div style="font-size: 36px; margin-bottom: 14px;">🔒</div>
+        Validando nivel de autorización en el sistema...
+      </div>
+    </div>
+    
+    <div id="viewMenu" class="view">
+      <div class="user-tag" id="userTagMenu">Usuario: ---</div>
+      <h2 id="saludoUsuario">¡Hola!</h2>
+      <div class="subtitle">PanelWeb de Gestión de Guardias</div>
+      
+      <button class="btn-main" id="btnIrRegistrar" style="padding: 16px; font-size: 15px; margin-top: 30px;">
+        📝 Registrar Falta
+      </button>
+
+      <button class="btn-main" id="btnIrInclusion" style="padding: 16px; font-size: 15px; margin-top: 12px;">
+        ➕ Registrar Inclusión
+      </button>
+
+      <button class="btn-main" id="btnIrCambioGuardia" style="padding: 16px; font-size: 15px; margin-top: 12px; opacity: 0.75;">
+        🔄 Cambio de Guardia
+      </button>
+
+      <button class="btn-main" id="btnIrListado" style="padding: 16px; font-size: 15px; margin-top: 12px;">
+        📋 Listado del Personal
+	  </button>
+	
+      <button class="btn-main btn-secondary" id="btnSalirApp" style="padding: 16px; font-size: 15px; margin-top: 12px;">
+        🚪 Salir
+      </button>			
+      
+      <div id="diagnosticoCarga" style="margin-top: 40px; padding: 10px; background: #000; color: #0f0; font-family: monospace; font-size: 11px; border-radius: 8px; text-align: left; border: 1px solid #222; white-space: pre-wrap; word-break: break-all;">
+        Diagnóstico: Inicializando y conectando...
+      </div>
+    </div>
+
+    <div id="viewFormulario" class="view">
+      <div class="user-tag" id="userTagForm">Usuario: ---</div>
+      <h2>Registrar Falta</h2>
+      <div class="subtitle">Registro de ausencias laborales del personal</div>
+      
+      <div class="form-group">
+        <label>👤 Nombre de la Persona:</label>
+        <select id="inputNombre">
+          <option value="">-- Cargando Personal --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>📌 Causa / Tipo de Falta:</label>
+        <select id="inputCausa">
+          <option value="">-- Cargando Causas --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>⏳ Duración (Días):</label>
+        <input type="number" id="inputDuracion" min="1" placeholder="Ej. 5">
+      </div>
+      
+      <div class="form-group">
+        <label>📅 Fecha de Inicio:</label>
+        <input type="date" id="inputFechaInicio">
+      </div>
+      
+      <div class="form-group">
+        <label>💬 Observaciones:</label>
+        <textarea id="inputObservaciones" placeholder="Detalles adicionales de la ausencia..."></textarea>
+      </div>
+      
+      <button class="btn-main" id="btnAceptarFalta">🚀 Aceptar y Procesar</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
+    </div>
+
+    <div id="viewConfirmar" class="view">
+      <div class="user-tag" id="userTagConfirm">Usuario: ---</div>
+      <h2>Confirmar Registro</h2>
+      <div class="subtitle">Verifique los datos introducidos y los cálculos del sistema</div>
+      
+      <div id="statusColision"></div>
+      
+      <div class="resumen-box">
+        <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Datos Introducidos</div>
+        <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntro" style="font-weight: 600;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📌 Causa:</span><span class="resumen-value" id="valCausaIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">⏳ Duración:</span><span class="resumen-value" id="valDuracionIntro">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio:</span><span class="resumen-value" id="valFechaIntro">--</span></div>
+        <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+          <span class="resumen-label">💬 Observaciones:</span>
+          <span id="valObsIntro" style="color: #e0e0e0; font-size: 12px; font-style: italic;">--</span>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #444; margin: 14px 0;">
+
+        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Cálculos del Sistema (Sheets)</div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Inicio Sugerida:</span><span class="resumen-value" id="valFechaSug" style="color: #93c47d;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Fin Calculada:</span><span class="resumen-value" id="valFechaFin">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Siguiente Día Hábil:</span><span class="resumen-value" id="valSigHabil">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Siguiente Guardia:</span><span class="resumen-value" id="valSigGuardia">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Reincorporación:</span><span class="resumen-value" id="valFechaReinc" style="font-weight: 600; color: var(--btn-primary);">--</span></div>
+      </div>
+      
+      <button class="btn-main" style="background-color: #2e6934;" id="btnGuardarDefinitivo">✅ Confirmar Registro Definitivo</button>
+      <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
+    </div>
+
+    <div id="viewFormularioInclusion" class="view">
+      <div class="user-tag" id="userTagFormInclusion">Usuario: ---</div>
+      <h2>Registrar Inclusión</h2>
+      <div class="subtitle">Registro de inclusiones temporales del personal</div>
+      
+      <div class="form-group">
+        <label>👤 Nombre de la Persona:</label>
+        <select id="inputNombreInclusion">
+          <option value="">-- Cargando Personal --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>⏳ Duración (Días):</label>
+        <input type="number" id="inputDuracionInclusion" min="1" placeholder="Ej. 5">
+      </div>
+      
+      <div class="form-group">
+        <label>📅 Fecha de Inicio:</label>
+        <input type="date" id="inputFechaInicioInclusion">
+      </div>
+      
+      <div class="form-group">
+        <label>💬 Observaciones:</label>
+        <textarea id="inputObservacionesInclusion" placeholder="Detalles adicionales de la inclusión..."></textarea>
+      </div>
+      
+      <button class="btn-main" id="btnAceptarInclusion">🚀 Aceptar y Procesar</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeInclusion">⬅️ Volver al Menú</button>
+    </div>
+
+    <div id="viewConfirmarInclusion" class="view">
+      <div class="user-tag" id="userTagConfirmInclusion">Usuario: ---</div>
+      <h2>Confirmar Inclusión</h2>
+      <div class="subtitle">Verifique los datos introducidos y los cálculos del sistema</div>
+      
+      <div id="statusNoEsSuGuardia"></div>
+      
+      <div class="resumen-box">
+        <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Datos Introducidos</div>
+        <div class="resumen-item"><span class="resumen-label">👤 Persona:</span><span class="resumen-value" id="valNombreIntroInclusion" style="font-weight: 600;">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">⏳ Duración:</span><span class="resumen-value" id="valDuracionIntroInclusion">--</span></div>
+        <div class="resumen-item"><span class="resumen-label">📅 Fecha Inicio:</span><span class="resumen-value" id="valFechaIntroInclusion">--</span></div>
+        <div class="resumen-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+          <span class="resumen-label">💬 Observaciones:</span>
+          <span id="valObsIntroInclusion" style="color: #e0e0e0; font-size: 12px; font-style: italic;">--</span>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #444; margin: 14px 0;">
+
+        <div style="font-size: 11px; color: #93c47d; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Cálculos del Sistema (Sheets)</div>
+        <div class="resumen-item"><span class="resumen-label">Fecha Fin Inclusión:</span><span class="resumen-value" id="valFechaFinInclusion" style="font-weight: 600; color: var(--btn-primary);">--</span></div>
+      </div>
+      
+      <button class="btn-main" style="background-color: #2e6934;" id="btnGuardarInclusionDefinitivo">✅ Confirmar Registro Definitivo</button>
+      <button class="btn-main btn-secondary" id="btnCancelarConfirmacionInclusion">❌ Modificar / Cancelar</button>
+    </div>
+
+    <div id="viewListadoPersonal" class="view">
+      <div class="user-tag" id="userTagListado">Usuario: ---</div>
+      <h2>Listado del Personal</h2>
+      <div class="subtitle">Seleccione los campos para estructurar el archivo Excel</div>
+      
+      <div class="checkbox-actions">
+        <button class="btn-mini" id="btnMarcarTodos">☑️ Seleccionar Todos</button>
+        <button class="btn-mini" id="btnDesmarcarTodos">⬜ Desmarcar Todos</button>
+      </div>
+
+      <div id="contenedorColumnas" style="max-height: 240px; overflow-y: auto; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 10px; margin-bottom: 16px;">
+        <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Sincronizando campos de la hoja...</div>
+      </div>
+
+      <button class="btn-main" id="btnExportarExcel" style="background-color: #2e6934;">🚀 Exportar a Excel</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeListado">⬅️ Volver al Menú</button>
+    </div>
+
+    <div id="viewProcesando" class="view">
+      <h2>Conectando con Servidor</h2>
+      <div class="subtitle" id="txtProgresoSub">Sincronizando...</div>
+      <div class="loading-box" id="txtProgresoDinamico">
+        Procesando, por favor espere...
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Capturador de errores global para auditoría directa en la pantalla del teléfono
+    window.addEventListener('error', function(e) {
+      const caja = document.getElementById('diagnosticoCarga');
+      if (caja) {
+        caja.style.color = '#ff8a8a';
+        caja.innerText = "❌ ERROR INTERNO DE SCRIPT:\n" + e.message + "\nLínea: " + e.lineno;
+      }
+    });
+
+    // 1. Inicialización de Telegram WebApp
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.expand();
+      tg.ready();
+    }
+
+    const paramsUrl = new URLSearchParams(window.location.search);
+
+    // Cambiamos a variables dinámicas para permitir la extracción segura desde la API nativa de Telegram
+    let TELEGRAM_CHAT_ID = paramsUrl.get("chatId");
+    let TELEGRAM_USER_NAME = paramsUrl.get("nombre");
+
+    // SOLUCIÓN AL BOTÓN DE ABRIR DIRECTO: Si la URL no trae datos, los saca del contexto nativo de la app
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      if (!TELEGRAM_CHAT_ID && tg.initDataUnsafe.user.id) {
+        TELEGRAM_CHAT_ID = tg.initDataUnsafe.user.id.toString();
+      }
+      if (!TELEGRAM_USER_NAME && tg.initDataUnsafe.user.first_name) {
+        TELEGRAM_USER_NAME = tg.initDataUnsafe.user.first_name;
+      }
+    }
+
+    // Respaldos finales si el entorno no es Telegram o falla completamente la detección
+    TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID || "ID_DESCONOCIDO";
+    TELEGRAM_USER_NAME = TELEGRAM_USER_NAME || "Operador";
+    
+    // URL invariable de tu WebApp de Google
+    const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7ZIEmHW8jlzynVl1hJTc3jWRTr9hVl3Phz1oQBX1VgKkeUsR6YBgPgiFqMWXtTdHS/exec";
+
+    let datosMemoriaOculta = null;
+    let datosMemoriaInclusion = null;
+
+    // Pintar etiquetas de usuario
+    document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagForm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagConfirm').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagFormInclusion').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagConfirmInclusion').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+    document.getElementById('userTagListado').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+
+    // Actualizar saludo dinámicamente con el nombre del usuario conectado
+    document.getElementById('saludoUsuario').innerText = "¡Hola, " + TELEGRAM_USER_NAME + "!";    
+
+    // 2. CONEXIÓN DINÁMICA CON TU MYDOGET DE GOOGLE SHEETS
+    document.addEventListener("DOMContentLoaded", () => {
+      const cajaDiag = document.getElementById('diagnosticoCarga');
+      cajaDiag.innerText = "📡 Conectando al servidor para verificar credenciales y sincronizar...";
+
+      // ENVIAMOS EL CHAT_ID AL BACKEND PARA VALIDAR DESDE EL INICIO
+      fetch(`${URL_BACKEND}?obtener=combos&chatId=${TELEGRAM_CHAT_ID}`)
+        .then(res => {
+          if (!res.ok) throw new Error("La red no respondió correctamente.");
+          return res.json();
+        })
+        .then(data => {
+          // REBOTE ESTRICTO DE SEGURIDAD SI NO ESTÁ AUTORIZADO
+          if (data.autorizado === false || data.estatus === "ACCESO_DENEGADO") {
+            document.querySelector('.container').innerHTML = `
+              <div style="text-align: center; padding: 40px 10px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🚫</div>
+                <h2 style="color: var(--error); margin-bottom: 8px;">Acceso Denegado</h2>
+                <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">
+                  No posees los privilegios requeridos.
+                </p>
+              </div>
+            `;
+            throw new Error("Acceso revocado por políticas de seguridad.");
+          }
+
+          if (data.estatus === "OK") {
+            const selectNombre = document.getElementById('inputNombre');
+            const selectNombreInclusion = document.getElementById('inputNombreInclusion');
+            const selectCausa = document.getElementById('inputCausa');
+
+            // Limpiar e inyectar datos reales de tu base de datos (Faltas)
+            selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+            // Limpiar e inyectar datos reales para Inclusiones Temporales
+            selectNombreInclusion.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+
+            data.personal.forEach(p => {
+              const opt1 = document.createElement('option');
+              opt1.value = p;
+              opt1.innerText = p;
+              selectNombre.appendChild(opt1);
+
+              const opt2 = document.createElement('option');
+              opt2.value = p;
+              opt2.innerText = p;
+              selectNombreInclusion.appendChild(opt2);
+            });
+
+            selectCausa.innerHTML = '<option value="">-- Seleccione Causa --</option>';
+            data.causas.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c;
+              opt.innerText = c;
+              selectCausa.appendChild(opt);
+            });
+
+            // INYECTAR DINÁMICAMENTE LAS MÁS DE 30 COLUMNAS PROVENIENTES DE LA HOJA 'PERSONAS'
+            const contenedorCol = document.getElementById('contenedorColumnas');
+            if (contenedorCol && data.columnas && data.columnas.length > 0) {
+              contenedorCol.innerHTML = '';
+              data.columnas.forEach((col, index) => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                  <input type="checkbox" id="chk_col_${index}" value="${col}" checked>
+                  <label for="chk_col_${index}" style="margin-bottom: 0; font-weight: normal; font-size: 13px; cursor: pointer; flex: 1;">${col}</label>
+                `;
+                contenedorCol.appendChild(div);
+              });
+            } else if (contenedorCol) {
+              contenedorCol.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 10px;">⚠️ No se encontraron columnas en la hoja.</div>';
+            }
+
+            if (cajaDiag) {
+              cajaDiag.style.color = '#0f0';
+              cajaDiag.innerText = `📡 Sincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+            }
+
+            // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
+            cambiarPantalla('viewMenu', "Acceso verificado y base de datos cargada.");
+          } else {
+            throw new Error(data.detalle || "Error desconocido del backend.");
+          }
+        })
+        .catch(err => {
+          // Si falla la red, mutamos la pantalla de carga para avisarle directo al operador
+          const viewVerif = document.getElementById('viewVerificando');
+          if (viewVerif) {
+            viewVerif.innerHTML = `
+              <h2 style="color: var(--error);">❌ Error de Conexión</h2>
+              <div class="subtitle">No se pudo enlazar con la base de datos</div>
+              <div class="loading-box" style="color: #ff8a8a; font-size: 12px; font-family: monospace; text-align: left; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; line-height: 1.4;">
+                ${err.message}<br><br>Por favor, cierra la MiniApp e intenta de nuevo.
+              </div>
+            `;
+          }
+          if (cajaDiag) {
+            cajaDiag.style.color = '#ff8a8a';
+            cajaDiag.innerText = `❌ Error al cargar combos desde Sheets:\n${err.message}`;
+          }
+        });
+    });
+
+    // Enrutador de pantallas
+    function cambiarPantalla(idDestino, logMsg) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(idDestino).classList.add('active');
+      if (logMsg) console.log("[Navegación] -> " + logMsg);
+    }
+
+    // VINCULACIÓN COMPATIBLE 100% MÓVIL
+    function vincularBoton(idBoton, accion) {
+      const el = document.getElementById(idBoton);
+      if (!el) return;
+      
+      el.addEventListener('click', function() {
+        const caja = document.getElementById('diagnosticoCarga');
+        if (caja) {
+          caja.innerText += `\n👆 [Tap] Botón "${idBoton}" detectado con éxito.`;
+        }
+        accion();
+      });
+    }
+
+    vincularBoton('btnIrRegistrar', () => {
+      cambiarPantalla('viewFormulario', "Abriendo formulario de faltas.");
+    });
+
+    vincularBoton('btnIrInclusion', () => {
+      cambiarPantalla('viewFormularioInclusion', "Abriendo formulario de inclusiones.");
+    });
+
+    vincularBoton('btnIrCambioGuardia', () => {
+      alert("🔄 Módulo Cambio de Guardia:\nPróximamente en la siguiente fase de desarrollo paso a paso.");
+    });
+
+    vincularBoton('btnVolverMenu', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
+    });
+
+    vincularBoton('btnVolverMenuDesdeInclusion', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
+    });
+
+    vincularBoton('btnCancelarConfirmacion', () => {
+      cambiarPantalla('viewFormulario', "Modificando datos.");
+    });
+
+    vincularBoton('btnCancelarConfirmacionInclusion', () => {
+      cambiarPantalla('viewFormularioInclusion', "Modificando datos de inclusión.");
+    });
+
+    // ENRUTAMIENTO DEL NUEVO MÓDULO DE LISTADO
+    vincularBoton('btnIrListado', () => {
+      cambiarPantalla('viewListadoPersonal', "Abriendo selección de campos para listado.");
+    });
+
+    vincularBoton('btnVolverMenuDesdeListado', () => {
+      cambiarPantalla('viewMenu', "Regresando al menú.");
+	});
+	
+    vincularBoton('btnSalirApp', () => {
+      if (tg) {
+        tg.close();
+      } else {
+        alert("Cerrando aplicación (entorno web fuera de Telegram).");
+      }
+    });	
+
+    // LÓGICA DE BOTONES DE MARCAR Y DESMARCAR RAPIDAMENTE
+    document.getElementById('btnMarcarTodos').addEventListener('click', () => {
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]').forEach(chk => chk.checked = true);
+    });
+
+    document.getElementById('btnDesmarcarTodos').addEventListener('click', () => {
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]').forEach(chk => chk.checked = false);
+    });
+
+    // VERIFICACIÓN Y ENVÍO DE CAMPOS SELECCIONADOS AL BACKEND (FASE 2)
+    vincularBoton('btnExportarExcel', () => {
+      const seleccionados = [];
+      document.querySelectorAll('#contenedorColumnas input[type="checkbox"]:checked').forEach(chk => {
+        seleccionados.push(chk.value);
+      });
+
+      if (seleccionados.length === 0) {
+        alert("⚠️ Por favor, seleccione al menos un campo para armar el listado.");
+        return;
+      }
+
+      // Cambiar a pantalla de procesamiento para dar feedback visual al usuario
+      document.getElementById('txtProgresoDinamico').innerText = "Generando archivo Excel con las columnas seleccionadas...";
+      cambiarPantalla('viewProcesando', "Procesando exportación de columnas...");
+
+      // Enviar la petición de exportación al backend
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+          accion: "exportar_excel", 
+          chatId: TELEGRAM_CHAT_ID, 
+          columnas: seleccionados 
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en la respuesta del servidor.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          alert("📊 ¡Listado generado! El archivo Excel ha sido enviado directamente a tu chat de Telegram.");
+          
+          cambiarPantalla('viewMenu', "Exportación completada.");
+        } else {
+          alert("Error al exportar: " + resJson.detalle);
+          cambiarPantalla('viewListadoPersonal', "Fallo en exportación.");
+        }
+      })
+      .catch(err => {
+        alert("Error de enlace con el servidor: " + err.message);
+        cambiarPantalla('viewListadoPersonal', "Fallo de red.");
+      });
+    });
+
+    // ACCIÓN: SIMULAR FALTA
+    vincularBoton('btnAceptarFalta', () => {
+      const nombre = document.getElementById('inputNombre').value;
+      const causa = document.getElementById('inputCausa').value;
+      const duracion = document.getElementById('inputDuracion').value;
+      const fechaInicio = document.getElementById('inputFechaInicio').value;
+      const observaciones = document.getElementById('inputObservaciones').value;
+
+      if (!nombre || !duracion || !fechaInicio) {
+        alert("⚠️ Por favor complete los campos requeridos: Persona, Duración y Fecha de Inicio.");
+        return;
+      }
+
+      datosMemoriaOculta = {
+        nombre: nombre,
+        causa: causa,
+        duracion: parseInt(duracion, 10),
+        fechaInicio: fechaInicio,
+        observaciones: observaciones
+      };
+
+      document.getElementById('txtProgresoDinamico').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
+      cambiarPantalla('viewProcesando', "Simulando falta...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors", 
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+          accion: "simular_falta", 
+          chatId: TELEGRAM_CHAT_ID, 
+          datos: datosMemoriaOculta 
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en respuesta de red.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          document.getElementById('valNombreIntro').innerText = datosMemoriaOculta.nombre;
+          document.getElementById('valCausaIntro').innerText = datosMemoriaOculta.causa;
+          document.getElementById('valDuracionIntro').innerText = datosMemoriaOculta.duracion + " día(s)";
+          
+          const [year, month, day] = datosMemoriaOculta.fechaInicio.split('-');
+          document.getElementById('valFechaIntro').innerText = `${day}/${month}/${year}`;
+          document.getElementById('valObsIntro').innerText = datosMemoriaOculta.observaciones || "Sin observaciones.";
+
+          document.getElementById('valFechaSug').innerText = resJson.fechaInicioSugerida;
+          document.getElementById('valFechaFin').innerText = resJson.fechaFin;
+          document.getElementById('valSigHabil').innerText = resJson.siguienteDiaHabil;
+          document.getElementById('valSigGuardia').innerText = resJson.siguienteGuardia;
+          document.getElementById('valFechaReinc').innerText = resJson.fechaReincorporacion;
+
+          const divColision = document.getElementById('statusColision');
+          if (resJson.colision === true || resJson.colision === "TRUE") {
+            divColision.className = "alerta-colision colision-true";
+            divColision.innerText = "⚠️ ADVERTENCIA: Se detectó colisión con otra falta de este operador.";
+          } else {
+            divColision.className = "alerta-colision colision-false";
+            divColision.innerText = "✅ LIBRE: Sin colisiones detectadas en el sistema.";
+          }
+
+          cambiarPantalla('viewConfirmar', "Resultados listos.");
+        } else {
+          alert("Error: " + resJson.detalle);
+          cambiarPantalla('viewFormulario', "Rebotado.");
+        }
+      })
+      .catch(err => {
+        alert("Error de red: " + err.message);
+        cambiarPantalla('viewFormulario', "Fallo.");
+      });
+    });
+
+    // ACCIÓN: ASENTAMIENTO DEFINITIVO DE FALTA
+    vincularBoton('btnGuardarDefinitivo', () => {
+      if (!datosMemoriaOculta) return;
+
+      document.getElementById('txtProgresoDinamico').innerText = "Asentando registro permanente en base de datos...";
+      cambiarPantalla('viewProcesando', "Guardando falta...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+          accion: "confirmar_falta", 
+          chatId: TELEGRAM_CHAT_ID, 
+          datos: datosMemoriaOculta 
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en respuesta de red.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+			alert("¡Registro guardado con éxito en Google Sheets!");
+          
+			document.getElementById('inputNombre').value = "";
+			document.getElementById('inputCausa').value = "";
+			document.getElementById('inputDuracion').value = "";
+			document.getElementById('inputFechaInicio').value = "";
+			document.getElementById('inputObservaciones').value = "";
+			cambiarPantalla('viewMenu', "Completado.");
+
+        } else {
+          alert("Error al guardar: " + resJson.detalle);
+          cambiarPantalla('viewConfirmar', "Fallo.");
+        }
+      })
+      .catch(err => {
+        alert("Error de enlace: " + err.message);
+        cambiarPantalla('viewConfirmar', "Fallo.");
+      });
+    });
+
+    // ACCIÓN: SIMULAR INCLUSIÓN TEMPORAL
+    vincularBoton('btnAceptarInclusion', () => {
+      const nombre = document.getElementById('inputNombreInclusion').value;
+      const duracion = document.getElementById('inputDuracionInclusion').value;
+      const fechaInicio = document.getElementById('inputFechaInicioInclusion').value;
+      const observaciones = document.getElementById('inputObservacionesInclusion').value;
+
+      if (!nombre || !duracion || !fechaInicio) {
+        alert("⚠️ Por favor complete los campos requeridos: Persona, Duración y Fecha de Inicio.");
+        return;
+      }
+
+      datosMemoriaInclusion = {
+        nombre: nombre,
+        duracion: parseInt(duracion, 10),
+        fechaInicio: fechaInicio,
+        observaciones: observaciones
+      };
+
+      document.getElementById('txtProgresoDinamico').innerText = "Procesando validación en Google Sheets, por favor espere...";
+      cambiarPantalla('viewProcesando', "Simulando inclusión...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          accion: "simular_inclusion",
+          chatId: TELEGRAM_CHAT_ID,
+          datos: datosMemoriaInclusion
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error en respuesta del servidor.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          document.getElementById('valNombreIntroInclusion').innerText = datosMemoriaInclusion.nombre;
+          document.getElementById('valDuracionIntroInclusion').innerText = datosMemoriaInclusion.duracion + " día(s)";
+          
+          const [year, month, day] = datosMemoriaInclusion.fechaInicio.split('-');
+          document.getElementById('valFechaIntroInclusion').innerText = `${day}/${month}/${year}`;
+          document.getElementById('valObsIntroInclusion').innerText = datosMemoriaInclusion.observaciones || "Sin observaciones.";
+
+          document.getElementById('valFechaFinInclusion').innerText = resJson.fechaFin;
+
+          const divNoEsSuGuardia = document.getElementById('statusNoEsSuGuardia');
+          const btnGuardarDefinitivoInclusion = document.getElementById('btnGuardarInclusionDefinitivo');
+
+          if (resJson.noEsSuGuardia === true || resJson.noEsSuGuardia === "TRUE") {
+            divNoEsSuGuardia.className = "alerta-colision colision-false";
+            divNoEsSuGuardia.innerText = "✅ PROCEDE: La fecha seleccionada no interfiere con su rol regular.";
+            btnGuardarDefinitivoInclusion.style.display = "flex"; // Habilitar el botón si cumple la condición
+          } else {
+            divNoEsSuGuardia.className = "alerta-colision colision-true";
+            divNoEsSuGuardia.innerText = "❌ OPERACIÓN BLOQUEADA: El operador ya tiene asignada una guardia para esta fecha. No se puede realizar una inclusión temporal.";
+            btnGuardarDefinitivoInclusion.style.display = "none"; // Ocultar de raíz el botón de confirmación
+          }
+
+          cambiarPantalla('viewConfirmarInclusion', "Verificación de inclusión lista.");
+        } else {
+          alert("Error del backend: " + resJson.detalle);
+          cambiarPantalla('viewFormularioInclusion', "Rebotado.");
+        }
+      })
+      .catch(err => {
+        alert("Error de red: " + err.message);
+        cambiarPantalla('viewFormularioInclusion', "Fallo.");
+      });
+    });
+
+    // ACCIÓN: ASENTAMIENTO DEFINITIVO DE INCLUSIÓN TEMPORAL
+    vincularBoton('btnGuardarInclusionDefinitivo', () => {
+      if (!datosMemoriaInclusion) return;
+
+      document.getElementById('txtProgresoDinamico').innerText = "Guardando inclusión temporal de manera permanente...";
+      cambiarPantalla('viewProcesando', "Asentando inclusión...");
+
+      fetch(URL_BACKEND, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          accion: "confirmar_inclusion",
+          chatId: TELEGRAM_CHAT_ID,
+          datos: datosMemoriaInclusion
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error de respuesta.");
+        return res.json();
+      })
+      .then(resJson => {
+        if (resJson.estatus === "OK") {
+          alert("¡Inclusión temporal guardada con éxito!");
+          
+			document.getElementById('inputNombreInclusion').value = "";
+			document.getElementById('inputDuracionInclusion').value = "";
+			document.getElementById('inputFechaInicioInclusion').value = "";
+			document.getElementById('inputObservacionesInclusion').value = "";
+			cambiarPantalla('viewMenu', "Completado.");
+
+        } else {
+          alert("Error al asentar registro: " + resJson.detalle);
+          cambiarPantalla('viewConfirmarInclusion', "Fallo.");
+        }
+      })
+      .catch(err => {
+        alert("Error de enlace: " + err.message);
+        cambiarPantalla('viewConfirmarInclusion', "Fallo.");
+      });
+    });
+  </script>
+</body>
+</html>
