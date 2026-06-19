@@ -325,10 +325,10 @@
       <div class="subtitle" id="subtituloCambioDinamico">Intercambio de guardia entre 2 personas</div>
       
       <div class="form-group">
-        <label>?? Modalidad de Cambio:</label>
+        <label>⚙️ Modalidad de Cambio:</label>
         <div class="toggle-container">
-          <button type="button" class="btn-toggle active" id="btnToggleIntercambio">?? Intercambio ?</button>
-          <button type="button" class="btn-toggle" id="btnToggleSimple">?? Simple</button>
+          <button type="button" class="btn-toggle active" id="btnToggleIntercambio">👥 Intercambio ✓</button>
+          <button type="button" class="btn-toggle" id="btnToggleSimple">👤 Simple</button>
         </div>
       </div>
 
@@ -336,11 +336,11 @@
         <div style="border-left: 3px solid var(--btn-primary); padding-left: 10px; margin-bottom: 15px;">
           <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; text-transform: uppercase;">Solicitante</div>
           <div class="form-group" style="margin-top: 5px;">
-            <label>Persona solicitante:</label>
+            <label>👤 Persona solicitante:</label>
             <select id="inputNombreOpA"><option value="">-- Seleccione Personal --</option></select>
           </div>
           <div class="form-group">
-            <label>Fecha Solicitada:</label>
+            <label>📅 Fecha Solicitada:</label>
             <input type="date" id="inputFechaOpA">
           </div>
         </div>
@@ -348,11 +348,11 @@
         <div style="border-left: 3px solid #93c47d; padding-left: 10px; margin-bottom: 15px;">
           <div style="font-size: 11px; color: #93c47d; font-weight: bold; text-transform: uppercase;">Relevo</div>
           <div class="form-group" style="margin-top: 5px;">
-            <label>Persona de Relevo:</label>
+            <label>👤 Persona de Relevo:</label>
             <select id="inputNombreOpB"><option value="">-- Seleccione Personal --</option></select>
           </div>
           <div class="form-group">
-            <label>Fecha de Relevo:</label>
+            <label>📅 Fecha de Relevo:</label>
             <input type="date" id="inputFechaOpB">
           </div>
         </div>
@@ -360,26 +360,26 @@
 
       <div id="bloqueCambioSimple" style="display: none;">
         <div class="form-group">
-          <label>?? Nombre de la Persona:</label>
+          <label>👤 Nombre de la Persona:</label>
           <select id="inputNombreSimple"><option value="">-- Seleccione Personal --</option></select>
         </div>
         <div class="form-group">
-          <label>?? Fecha de falta:</label>
+          <label>📅 Fecha de falta:</label>
           <input type="date" id="inputFechaFaltaSimple">
         </div>
         <div class="form-group">
-          <label>? Fecha de inclusion:</label>
+          <label>📅 Fecha de inclusion:</label>
           <input type="date" id="inputFechaInclusionSimple">
         </div>
       </div>
 
       <div class="form-group">
-        <label>?? Observaciones (Opcional):</label>
+        <label>💬 Observaciones (Opcional):</label>
         <textarea id="inputObservacionesCambio" placeholder="Justificacion del cambio de guardia..."></textarea>
       </div>
 
-      <button class="btn-main" id="btnAceptarCambio">?? Aceptar y Procesar</button>
-      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeCambio">?? Volver al Menu</button>
+      <button class="btn-main" id="btnAceptarCambio">🚀 Aceptar y Procesar</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeCambio">⬅️ Volver al Menú</button>
     </div>	
 	
 	
@@ -628,22 +628,28 @@
             const selectNombre = document.getElementById('inputNombre');
             const selectNombreInclusion = document.getElementById('inputNombreInclusion');
             const selectCausa = document.getElementById('inputCausa');
+			  const selectNombreOpA = document.getElementById('inputNombreOpA');
+			  const selectNombreOpB = document.getElementById('inputNombreOpB');
+			  const selectNombreSimple = document.getElementById('inputNombreSimple');
 
             // Limpiar e inyectar datos reales de tu base de datos (Faltas)
             selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
             // Limpiar e inyectar datos reales para Inclusiones Temporales
             selectNombreInclusion.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+			  selectNombreOpA.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+			  selectNombreOpB.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+			  selectNombreSimple.innerHTML = '<option value="">-- Seleccione Personal --</option>';
 
             data.personal.forEach(p => {
               const opt1 = document.createElement('option');
               opt1.value = p;
               opt1.innerText = p;
               selectNombre.appendChild(opt1);
-
-              const opt2 = document.createElement('option');
-              opt2.value = p;
-              opt2.innerText = p;
-              selectNombreInclusion.appendChild(opt2);
+			  selectNombreInclusion.appendChild(opt1);
+				selectNombreOpA.appendChild(opt1);
+				selectNombreOpB.appendChild(opt1);
+				selectNombreSimple.appendChild(opt1);			  
+			  
             });
 
             selectCausa.innerHTML = '<option value="">-- Seleccione Causa --</option>';
