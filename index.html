@@ -392,6 +392,93 @@
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacionInclusion">❌ Modificar / Cancelar</button>
     </div>
 
+
+
+
+
+	  
+	<div id="viewFormularioCambio" class="view">
+      <div class="user-tag" id="userTagFormCambio">Usuario: ---</div>
+      <h2>Cambio de Guardia</h2>
+      <div class="subtitle">Gestión y permutas operativas del personal</div>
+      
+      <div class="form-group">
+        <label>⚙️ Modalidad de Cambio:</label>
+        <select id="inputTipoCambio">
+          <option value="Simple">Cambio Simple (1 Solo Operador)</option>
+          <option value="Intercambio">Intercambio Cruzado (2 Operadores)</option>
+        </select>
+      </div>
+
+      <div id="bloqueCambioSimple">
+        <div class="form-group">
+          <label>👤 Nombre del Operador:</label>
+          <select id="inputNombreSimple">
+            <option value="">-- Seleccione Personal --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📅 Fecha que Falta (Su Guardia):</label>
+          <input type="date" id="inputFechaFaltaSimple">
+        </div>
+        <div class="form-group">
+          <label>➕ Fecha que Incluye (Su Relevo):</label>
+          <input type="date" id="inputFechaInclusionSimple">
+        </div>
+      </div>
+
+      <div id="bloqueIntercambio" style="display: none;">
+        <div style="border-left: 3px solid var(--btn-primary); padding-left: 10px; margin-bottom: 15px;">
+          <div style="font-size: 11px; color: var(--btn-primary); font-weight: bold; text-transform: uppercase;">Operador 1 (Solicitante)</div>
+          <div class="form-group" style="margin-top: 5px;">
+            <label>Persona A:</label>
+            <select id="inputNombreOpA"><option value="">-- Seleccione Personal --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Fecha Cedida (Fecha Falta A / Cubre B):</label>
+            <input type="date" id="inputFechaOpA">
+          </div>
+        </div>
+
+        <div style="border-left: 3px solid #93c47d; padding-left: 10px; margin-bottom: 15px;">
+          <div style="font-size: 11px; color: #93c47d; font-weight: bold; text-transform: uppercase;">Operador 2 (Relevo)</div>
+          <div class="form-group" style="margin-top: 5px;">
+            <label>Persona B:</label>
+            <select id="inputNombreOpB"><option value="">-- Seleccione Personal --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Fecha Devuelta (Fecha Falta B / Cubre A):</label>
+            <input type="date" id="inputFechaOpB">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>📝 Observaciones Generales:</label>
+        <textarea id="inputObservacionesCambio" placeholder="Justificación del cambio de guardia..."></textarea>
+      </div>
+
+      <button class="btn-main" id="btnAceptarCambio">🔍 Simular y Validar</button>
+      <button class="btn-main btn-secondary" id="btnVolverMenuDesdeCambio">📋 Volver al Menú</button>
+    </div>
+
+    <div id="viewConfirmarCambio" class="view">
+      <div class="user-tag" id="userTagConfirmCambio">Usuario: ---</div>
+      <h2>Validación de Criterios</h2>
+      <div class="subtitle">Análisis de consistencia en matriz de guardias</div>
+
+      <div id="contenedorChecklist"></div>
+
+      <button class="btn-main" style="background-color: #2e6934; margin-top: 15px;" id="btnGuardarCambioDefinitivo">💾 Asentar Cambio en Base de Datos</button>
+      <button class="btn-main btn-secondary" id="btnCancelarCambio">⚡ Modificar Parámetros</button>
+    </div>
+
+
+
+
+
+	  
+	  
     <div id="viewListadoPersonal" class="view">
       <div class="user-tag" id="userTagListado">Usuario: ---</div>
       <h2>Listado del Personal</h2>
@@ -935,6 +1022,247 @@
         cambiarPantalla('viewConfirmarInclusion', "Fallo.");
       });
     });
+
+
+
+
+
+
+
+
+// Memoria volátil exclusiva para el módulo de cambios
+let datosCambioMemoria = null;
+
+// Habilitar opacidad completa al botón del menú principal en la carga exitosa
+if (document.getElementById('btnIrCambioGuardia')) {
+  document.getElementById('btnIrCambioGuardia').style.opacity = "1";
+}
+
+// Inyección de combos para cambio de guardia en la fase de inicialización (Filtro data.estatus === "OK")
+// Agrega esto donde se cargan los elementos "selectNombre" y "selectNombreInclusion":
+const selectSimple = document.getElementById('inputNombreSimple');
+const selectOpA = document.getElementById('inputNombreOpA');
+const selectOpB = document.getElementById('inputNombreOpB');
+
+if (selectSimple && selectOpA && selectOpB) {
+  selectSimple.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+  selectOpA.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+  selectOpB.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+  
+  data.personal.forEach(p => {
+    let o1 = document.createElement('option'); o1.value = p; o1.innerText = p; selectSimple.appendChild(o1);
+    let o2 = document.createElement('option'); o2.value = p; o2.innerText = p; selectOpA.appendChild(o2);
+    let o3 = document.createElement('option'); o3.value = p; o3.innerText = p; selectOpB.appendChild(o3);
+  });
+}
+
+// Escuchador dinámico de cambio de interfaz (Simple vs Intercambio)
+document.getElementById('inputTipoCambio').addEventListener('change', function(e) {
+  if (e.target.value === "Simple") {
+    document.getElementById('bloqueCambioSimple').style.display = "block";
+    document.getElementById('bloqueIntercambio').style.display = "none";
+  } else {
+    document.getElementById('bloqueCambioSimple').style.display = "none";
+    document.getElementById('bloqueIntercambio').style.display = "block";
+  }
+});
+
+// Vinculación de Enrutamiento de Botones
+vincularBoton('btnIrCambioGuardia', () => {
+  if(tg) {
+    document.getElementById('userTagFormCambio').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+  }
+  cambiarPantalla('viewFormularioCambio', "Abriendo módulo de cambios.");
+});
+
+vincularBoton('btnVolverMenuDesdeCambio', () => { cambiarPantalla('viewMenu', "Regresando al menú."); });
+vincularBoton('btnCancelarCambio', () => { cambiarPantalla('viewFormularioCambio', "Corrigiendo formulario."); });
+
+// Función Auxiliar de Formateo de Fechas (YYYY-MM-DD -> DD/MM/YYYY) para validaciones cruzadas
+function formatearFechaA_DDMMYYYY(fechaStr) {
+  if (!fechaStr) return "";
+  const parts = fechaStr.split("-");
+  return parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : fechaStr;
+}
+
+// ACCIÓN: ACCIONAR SIMULACIÓN DE CAMBIO DE GUARDIA
+vincularBoton('btnAceptarCambio', () => {
+  const tipo = document.getElementById('inputTipoCambio').value;
+  const observacionesBase = document.getElementById('inputObservacionesCambio').value;
+  
+  let paquetePeticion = { tipo: tipo };
+
+  if (tipo === "Simple") {
+    const nombre = document.getElementById('inputNombreSimple').value;
+    const fFalta = document.getElementById('inputFechaFaltaSimple').value;
+    const fInc = document.getElementById('inputFechaInclusionSimple').value;
+
+    if (!nombre || !fFalta || !fInc) {
+      alert("⚠️ Por favor completa los campos: Operador, Fecha Falta y Fecha Inclusión.");
+      return;
+    }
+    
+    paquetePeticion.nombre = nombre;
+    paquetePeticion.fechaFalta = fFalta;
+    paquetePeticion.fechaInclusion = fInc;
+    // Ensamblaje inteligente de comentarios solicitado
+    paquetePeticion.obsFalta = (observacionesBase ? observacionesBase + " | " : "") + "Cambio de guardia a la fecha " + formatearFechaA_DDMMYYYY(fInc);
+    paquetePeticion.obsInclusion = (observacionesBase ? observacionesBase + " | " : "") + "Cambio de guardia de la fecha " + formatearFechaA_DDMMYYYY(fFalta);
+
+  } else {
+    const nomA = document.getElementById('inputNombreOpA').value;
+    const fA = document.getElementById('inputFechaOpA').value;
+    const nomB = document.getElementById('inputNombreOpB').value;
+    const fB = document.getElementById('inputFechaOpB').value;
+
+    if (!nomA || !fA || !nomB || !fB) {
+      alert("⚠️ Por favor completa los datos de ambos operadores y sus respectivas fechas.");
+      return;
+    }
+    if (nomA === nomB) {
+      alert("⚠️ El Operador 1 y el Operador 2 no pueden ser la misma persona.");
+      return;
+    }
+
+    paquetePeticion.nombreSolicitante = nomA;
+    paquetePeticion.fechaSolicitada = fA;
+    paquetePeticion.nombreRelevo = nomB;
+    paquetePeticion.fechaRelevo = fB;
+    
+    // Ensamblaje cruzado estructurado de comentarios automatizados
+    paquetePeticion.obsFaltaSolicitante = (observacionesBase ? observacionesBase + " | " : "") + "Intercambio de guardia con " + nomB + " a la fecha " + formatearFechaA_DDMMYYYY(fB);
+    paquetePeticion.obsInclusionSolicitante = (observacionesBase ? observacionesBase + " | " : "") + "Intercambio de guardia con " + nomB + " de la fecha " + formatearFechaA_DDMMYYYY(fA);
+    paquetePeticion.obsFaltaRelevo = (observacionesBase ? observacionesBase + " | " : "") + "Intercambio de guardia con " + nomA + " a la fecha " + formatearFechaA_DDMMYYYY(fA);
+    paquetePeticion.obsInclusionRelevo = (observacionesBase ? observacionesBase + " | " : "") + "Intercambio de guardia con " + nomA + " de la fecha " + formatearFechaA_DDMMYYYY(fB);
+  }
+
+  datosCambioMemoria = paquetePeticion;
+  
+  document.getElementById('txtProgresoDinamico').innerText = "Corriendo simulación paralela en Sheets (Faltas e Inclusiones)...";
+  cambiarPantalla('viewProcesando', "Validando cambio...");
+
+  fetch(URL_BACKEND, {
+    method: "POST",
+    mode: "cors",
+    redirect: "follow",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ accion: "simular_cambio", chatId: TELEGRAM_CHAT_ID, datos: datosCambioMemoria })
+  })
+  .then(res => { if (!res.ok) throw new Error("Error en red."); return res.json(); })
+  .then(resJson => {
+    if (resJson.estatus === "OK") {
+      if(tg) document.getElementById('userTagConfirmCambio').innerText = "Usuario: " + TELEGRAM_USER_NAME;
+      
+      const contenedor = document.getElementById('contenedorChecklist');
+      contenedor.innerHTML = ""; // Vaciar caja
+
+      let htmlCheck = "";
+      
+      if (resJson.tipo === "Simple") {
+        const fFaltaFormato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaFalta);
+        const tieneGuardiaEseDia = (resJson.fechaInicioSugerida === fFaltaFormato);
+        const noTieneColision = (resJson.colision === false || resJson.colision === "FALSE");
+        const esValidoInclusion = (resJson.noEsSuGuardia === true || resJson.noEsSuGuardia === "TRUE");
+
+        htmlCheck += `<div style="font-size:12px; font-weight:bold; color:var(--btn-primary); margin-bottom:8px;">INFORME: ${datosCambioMemoria.nombre}</div>`;
+        
+        htmlCheck += `<div class="alerta-colision ${tieneGuardiaEseDia ? 'colision-false' : 'colision-true'}">
+          ${tieneGuardiaEseDia ? '✅ Tiene guardia ordinaria el ' + fFaltaFormato : '❌ No figura en rol de guardia el ' + fFaltaFormato}
+        </div>`;
+        
+        htmlCheck += `<div class="alerta-colision ${noTieneColision ? 'colision-false' : 'colision-true'}">
+          ${noTieneColision ? '✅ Libre de faltas previas en esa fecha' : '❌ Conflicto: Ya posee una falta registrada ese día'}
+        </div>`;
+        
+        htmlCheck += `<div class="alerta-colision ${esValidoInclusion ? 'colision-false' : 'colision-true'}">
+          ${esValidoInclusion ? '✅ Día libre verificado para Inclusión' : '❌ Conflicto: Ya posee guardia ordinaria el día de inclusión'}
+        </div>`;
+
+      } else {
+        // Validación Cruzada de Intercambio
+        const fA_Formato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaSolicitada);
+        const fB_Formato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaRelevo);
+        
+        const Sol_TieneGuardia = (resJson.solicitante.fechaInicioSugerida === fA_Formato);
+        const Sol_NoColision = (resJson.solicitante.colision === false || resJson.solicitante.colision === "FALSE");
+        const Sol_LibreInclusion = (resJson.solicitante.noEsSuGuardia === true || resJson.solicitante.noEsSuGuardia === "TRUE");
+
+        const Rel_TieneGuardia = (resJson.relevo.fechaInicioSugerida === fB_Formato);
+        const Rel_NoColision = (resJson.relevo.colision === false || resJson.relevo.colision === "FALSE");
+        const Rel_LibreInclusion = (resJson.relevo.noEsSuGuardia === true || resJson.relevo.noEsSuGuardia === "TRUE");
+
+        htmlCheck += `<div style="font-size:12px; font-weight:bold; color:var(--btn-primary); margin-bottom:8px;">SOLICITANTE: ${datosCambioMemoria.nombreSolicitante}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Sol_TieneGuardia ? 'colision-false' : 'colision-true'}">${Sol_TieneGuardia ? '✅ Posee la guardia del ' + fA_Formato : '❌ No tiene guardia el ' + fA_Formato}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Sol_NoColision ? 'colision-false' : 'colision-true'}">${Sol_NoColision ? '✅ Sin ausencias previas el ' + fA_Formato : '❌ Conflicto de ausencia el ' + fA_Formato}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Sol_LibreInclusion ? 'colision-false' : 'colision-true'}">${Sol_LibreInclusion ? '✅ Libre para cubrir el ' + fB_Formato : '❌ Ya tiene guardia asignada el ' + fB_Formato}</div>`;
+
+        htmlCheck += `<div style="font-size:12px; font-weight:bold; color:#93c47d; margin: 12px 0 8px 0;">RELEVO: ${datosCambioMemoria.nombreRelevo}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Rel_TieneGuardia ? 'colision-false' : 'colision-true'}">${Rel_TieneGuardia ? '✅ Posee la guardia del ' + fB_Formato : '❌ No tiene guardia el ' + fB_Formato}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Rel_NoColision ? 'colision-false' : 'colision-true'}">${Rel_NoColision ? '✅ Sin ausencias previas el ' + fB_Formato : '❌ Conflicto de ausencia el ' + fB_Formato}</div>`;
+        htmlCheck += `<div class="alerta-colision ${Rel_LibreInclusion ? 'colision-false' : 'colision-true'}">${Rel_LibreInclusion ? '✅ Libre para cubrir el ' + fA_Formato : '❌ Ya tiene guardia asignada el ' + fA_Formato}</div>`;
+      }
+
+      contenedor.innerHTML = htmlCheck;
+      cambiarPantalla('viewConfirmarCambio', "Mostrando matriz de validaciones.");
+    } else {
+      alert("Error: " + resJson.detalle);
+      cambiarPantalla('viewFormularioCambio');
+    }
+  })
+  .catch(err => {
+    alert("Error de enlace: " + err.message);
+    cambiarPantalla('viewFormularioCambio');
+  });
+});
+
+// ACCIÓN: ASENTAMIENTO PERMANENTE EN GOOGLE SHEETS
+vincularBoton('btnGuardarCambioDefinitivo', () => {
+  if (!datosCambioMemoria) return;
+
+  document.getElementById('txtProgresoDinamico').innerText = "Guardando cambios y bloqueando celdas en el Core...";
+  cambiarPantalla('viewProcesando', "Asentando registro definitivo...");
+
+  fetch(URL_BACKEND, {
+    method: "POST",
+    mode: "cors",
+    redirect: "follow",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ accion: "confirmar_cambio", chatId: TELEGRAM_CHAT_ID, datos: datosCambioMemoria })
+  })
+  .then(res => { if (!res.ok) throw new Error("Error en respuesta."); return res.json(); })
+  .then(resJson => {
+    if (resJson.estatus === "OK") {
+      alert("🎉 ¡El Cambio de Guardia ha sido procesado y asentado con éxito en la base de datos de Google Sheets!");
+      
+      // Limpieza integral y preventiva de formularios
+      document.getElementById('inputNombreSimple').value = "";
+      document.getElementById('inputFechaFaltaSimple').value = "";
+      document.getElementById('inputFechaInclusionSimple').value = "";
+      document.getElementById('inputNombreOpA').value = "";
+      document.getElementById('inputFechaOpA').value = "";
+      document.getElementById('inputNombreOpB').value = "";
+      document.getElementById('inputFechaOpB').value = "";
+      document.getElementById('inputObservacionesCambio').value = "";
+      
+      datosCambioMemoria = null;
+      cambiarPantalla('viewMenu', "Completado exitosamente.");
+    } else {
+      alert("Error crítico: " + resJson.detalle);
+      cambiarPantalla('viewConfirmarCambio');
+    }
+  })
+  .catch(err => {
+    alert("Error de enlace permanente: " + err.message);
+    cambiarPantalla('viewConfirmarCambio');
+  });
+});
+
+
+
+
+
+
+	  
   </script>
 </body>
 </html>
