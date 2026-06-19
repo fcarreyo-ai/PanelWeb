@@ -708,7 +708,7 @@
 
             if (cajaDiag) {
               cajaDiag.style.color = '#0f0';
-              cajaDiag.innerText = `📡 PanelWeb v4.1.2 -modulo cambio\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+              cajaDiag.innerText = `📡 PanelWeb v4.1.3 -modulo cambio\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
             }
 
             // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
@@ -957,12 +957,12 @@
 			const R_Libre = (resJson.relevo.noEsSuGuardia === true || resJson.relevo.noEsSuGuardia === "TRUE");
 
 			htmlCheck += `<div style="font-size:13px; font-weight:bold; color:var(--btn-primary); margin-bottom:6px;">SOLICITANTE: ${datosCambioMemoria.nombreSolicitante}</div>`;
-			htmlCheck += `<div class="alerta-colision ${S_Tiene ? 'colision-false' : 'colision-true'}">${S_Tiene ? '✅ Posee la guardia del ' + fA_Formato : '❌ No tiene guardia el ' + fA_Formato}</div>`;
+			htmlCheck += `<div class="alerta-colision ${S_Tiene ? 'colision-false' : 'colision-true'}">${S_Tiene ? '✅ Posee la guardia del ' + fA_Formato : '❌ No tiene guardia el ' + fA_Formato + '--' + resJson.solicitante.fechaInicioSugerida}</div>`;
 			htmlCheck += `<div class="alerta-colision ${S_NoCol ? 'colision-false' : 'colision-true'}">${S_NoCol ? '✅ Sin faltas el ' + fA_Formato : '❌ Conflicto de ausencia el ' + fA_Formato}</div>`;
 			htmlCheck += `<div class="alerta-colision ${S_Libre ? 'colision-false' : 'colision-true'}">${S_Libre ? '✅ Libre para cubrir el ' + fB_Formato : '❌ Ya tiene guardia fija asignada el ' + fB_Formato}</div>`;
 
 			htmlCheck += `<div style="font-size:13px; font-weight:bold; color:#93c47d; margin:12px 0 6px 0;">RELEVO: ${datosCambioMemoria.nombreRelevo}</div>`;
-			htmlCheck += `<div class="alerta-colision ${R_Tiene ? 'colision-false' : 'colision-true'}">${R_Tiene ? '✅ Posee la guardia del ' + fB_Formato : '❌ No tiene guardia el ' + fB_Formato}</div>`;
+			htmlCheck += `<div class="alerta-colision ${R_Tiene ? 'colision-false' : 'colision-true'}">${R_Tiene ? '✅ Posee la guardia del ' + fB_Formato : '❌ No tiene guardia el ' + fB_Formato + '--' + resJson.relevo.fechaInicioSugerida}</div>`;
 			htmlCheck += `<div class="alerta-colision ${R_NoCol ? 'colision-false' : 'colision-true'}">${R_NoCol ? '✅ Sin faltas el ' + fB_Formato : '❌ Conflicto de ausencia el ' + fB_Formato}</div>`;
 			htmlCheck += `<div class="alerta-colision ${R_Libre ? 'colision-false' : 'colision-true'}">${R_Libre ? '✅ Libre para cubrir el ' + fA_Formato : '❌ Ya tiene guardia fija asignada el ' + fA_Formato}</div>`;
 		  }
