@@ -708,7 +708,7 @@
 
             if (cajaDiag) {
               cajaDiag.style.color = '#0f0';
-              cajaDiag.innerText = `📡 PanelWeb v4.1.3 -modulo cambio\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+              cajaDiag.innerText = `📡 PanelWeb v4.1.4 -modulo cambio\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
             }
 
             // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
@@ -861,7 +861,7 @@
 	// Conversor auxiliar de formatos de fecha (YYYY-MM-DD -> DD/MM/YYYY)
 	function formatearFechaA_DDMMYYYY(fechaStr) {
 	  if (!fechaStr) return "";
-	  const parts = fechaStr.split("-");
+	  const parts = fechaStr.trim().split("-");
 	  return parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : fechaStr;
 	}
 
@@ -935,7 +935,7 @@
 		  
 		  if (resJson.tipo === "Simple") {
 			const fFaltaFormato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaFalta);
-			const tieneGuardia = (resJson.fechaInicioSugerida === fFaltaFormato);
+			const tieneGuardia = (resJson.fechaInicioSugerida.trim() === fFaltaFormato);
 			const noColision = (resJson.colision === false || resJson.colision === "FALSE");
 			const esValidoInc = (resJson.noEsSuGuardia === true || resJson.noEsSuGuardia === "TRUE");
 
@@ -948,11 +948,11 @@
 			const fA_Formato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaSolicitada);
 			const fB_Formato = formatearFechaA_DDMMYYYY(datosCambioMemoria.fechaRelevo);
 			
-			const S_Tiene = (resJson.solicitante.fechaInicioSugerida === fA_Formato);
+			const S_Tiene = (resJson.solicitante.fechaInicioSugerida.trim() === fA_Formato);
 			const S_NoCol = (resJson.solicitante.colision === false || resJson.solicitante.colision === "FALSE");
 			const S_Libre = (resJson.solicitante.noEsSuGuardia === true || resJson.solicitante.noEsSuGuardia === "TRUE");
 
-			const R_Tiene = (resJson.relevo.fechaInicioSugerida === fB_Formato);
+			const R_Tiene = (resJson.relevo.fechaInicioSugerida.trim() === fB_Formato);
 			const R_NoCol = (resJson.relevo.colision === false || resJson.relevo.colision === "FALSE");
 			const R_Libre = (resJson.relevo.noEsSuGuardia === true || resJson.relevo.noEsSuGuardia === "TRUE");
 
