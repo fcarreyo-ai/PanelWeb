@@ -628,6 +628,7 @@
             const selectNombre = document.getElementById('inputNombre');
             const selectNombreInclusion = document.getElementById('inputNombreInclusion');
             const selectCausa = document.getElementById('inputCausa');
+			  
 			  const selectNombreOpA = document.getElementById('inputNombreOpA');
 			  const selectNombreOpB = document.getElementById('inputNombreOpB');
 			  const selectNombreSimple = document.getElementById('inputNombreSimple');
@@ -636,6 +637,7 @@
             selectNombre.innerHTML = '<option value="">-- Seleccione Personal --</option>';
             // Limpiar e inyectar datos reales para Inclusiones Temporales
             selectNombreInclusion.innerHTML = '<option value="">-- Seleccione Personal --</option>';
+			  
 			  selectNombreOpA.innerHTML = '<option value="">-- Seleccione Personal --</option>';
 			  selectNombreOpB.innerHTML = '<option value="">-- Seleccione Personal --</option>';
 			  selectNombreSimple.innerHTML = '<option value="">-- Seleccione Personal --</option>';
@@ -644,11 +646,29 @@
               const opt1 = document.createElement('option');
               opt1.value = p;
               opt1.innerText = p;
+
+              const opt2 = document.createElement('option');
+              opt2.value = p;
+              opt2.innerText = p;
+
+              const opt3 = document.createElement('option');
+              opt3.value = p;
+              opt3.innerText = p;
+
+              const opt4 = document.createElement('option');
+              opt4.value = p;
+              opt4.innerText = p;
+
+              const opt5 = document.createElement('option');
+              opt5.value = p;
+              opt5.innerText = p;
+
+				
               selectNombre.appendChild(opt1);
-			  selectNombreInclusion.appendChild(opt1);
-				selectNombreOpA.appendChild(opt1);
-				selectNombreOpB.appendChild(opt1);
-				selectNombreSimple.appendChild(opt1);			  
+			  selectNombreInclusion.appendChild(opt2);
+				selectNombreOpA.appendChild(opt3);
+				selectNombreOpB.appendChild(opt4);
+				selectNombreSimple.appendChild(opt5);			  
 			  
             });
 
