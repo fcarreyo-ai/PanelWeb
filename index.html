@@ -396,40 +396,78 @@
 	
 	
 
+    <!-- VISTA FORMULARIO REORGANIZADO SIARH-24 -->
     <div id="viewFormulario" class="view">
       <div class="user-tag" id="userTagForm">Usuario: ---</div>
       <h2>Registrar Falta</h2>
       <div class="subtitle">Registro de ausencias laborales del personal</div>
       
+      <!-- 1. SELECCIÓN DE TRABAJADOR -->
       <div class="form-group">
         <label>👤 Nombre de la Persona:</label>
         <select id="inputNombre">
           <option value="">-- Cargando Personal --</option>
         </select>
       </div>
-      
+
+      <!-- 2. JERARQUÍA COMPACTA DE CAUSAS (SELECTS EN CASCADA) -->
       <div class="form-group">
         <label>📌 Causa / Tipo de Falta:</label>
-        <select id="inputCausa">
-          <option value="">-- Cargando Causas --</option>
+        <select id="inputCausaL1" style="margin-bottom: 6px;">
+          <option value="">-- Seleccione Categoría Principal --</option>
+        </select>
+        
+        <select id="inputCausaL2" style="display:none; margin-bottom: 6px; font-size: 13px; padding-left: 20px;">
+          <option value="">↳ Seleccione Subcategoría --</option>
+        </select>
+        
+        <select id="inputCausaL3" style="display:none; font-size: 13px; padding-left: 28px;">
+          <option value="">↳ Seleccione Causa Específica --</option>
         </select>
       </div>
-      
-      <div class="form-group">
-        <label>⏳ Duración (Días):</label>
-        <input type="number" id="inputDuracion" min="1" placeholder="Ej. 5">
-      </div>
-      
+
+      <!-- 3. FECHA DE INICIO -->
       <div class="form-group">
         <label>📅 Fecha de Inicio:</label>
         <input type="date" id="inputFechaInicio">
       </div>
-      
+
+      <!-- 4. DURACIÓN Y MODALIDAD DÍAS/HORAS -->
       <div class="form-group">
-        <label>💬 Observaciones:</label>
-        <textarea id="inputObservaciones" placeholder="Detalles adicionales de la ausencia..."></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="margin-bottom:0;">⏳ Duración:</label>
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            <label style="margin-right:8px; cursor:pointer;"><input type="radio" name="tipoDuracion" value="dias" checked> Días</label>
+            <label style="cursor:pointer;"><input type="radio" name="tipoDuracion" value="horas"> Horas</label>
+          </div>
+        </div>
+        <input type="number" id="inputDuracion" min="1" placeholder="Ej. 5">
       </div>
-      
+
+      <!-- CAMPO CONDICIONAL: FECHA CITA IVSS -->
+      <div class="form-group" id="bloqueFechaCitaIVSS" style="display:none; background: rgba(82, 136, 193, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--btn-primary);">
+        <label>🏥 Fecha de la Cita IVSS:</label>
+        <input type="date" id="inputFechaCitaIVSS">
+      </div>
+
+      <!-- 5. RECAUDOS ANEXOS (MAX 180 CHARS) -->
+      <div class="form-group">
+        <label>📑 Indique recaudos que anexa (Máx. 180 caract.):</label>
+        <textarea id="inputRecaudos" maxlength="180" placeholder="Ej. Récipe médico del IVSS, Constancia de asistencia..."></textarea>
+      </div>
+
+      <!-- 6. ADJUNTAR ANEXOS (VALIDACIÓN JPG/PNG) -->
+      <div class="form-group">
+        <label>📎 Adjuntar Imágenes de Recaudos (JPG/PNG, Máx 5MB):</label>
+        <input type="file" id="inputArchivosAnexos" accept="image/jpeg, image/png" multiple style="font-size:12px; padding:6px;">
+      </div>
+
+      <!-- 7. OBSERVACIONES -->
+      <div class="form-group">
+        <label>💬 Observaciones (Máx. 600 caract.):</label>
+        <textarea id="inputObservaciones" maxlength="600" placeholder="Detalles adicionales de la ausencia..."></textarea>
+      </div>
+
       <button class="btn-main" id="btnAceptarFalta">🚀 Aceptar y Procesar</button>
       <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
     </div>
@@ -594,6 +632,7 @@
 
     let datosMemoriaOculta = null;
     let datosMemoriaInclusion = null;
+	let jerarquiaCausasMemoria = null;
 
     // Pintar etiquetas de usuario
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
@@ -634,6 +673,9 @@
           }
 
           if (data.estatus === "OK") {
+
+			poblarSelectsCausas(data.jerarquiaCausas);
+			  
             const selectNombre = document.getElementById('inputNombre');
             const selectNombreInclusion = document.getElementById('inputNombreInclusion');
             const selectCausa = document.getElementById('inputCausa');
@@ -756,6 +798,105 @@
         accion();
       });
     }
+
+
+
+// --- LÓGICA DE NIVELES EN CASCADA (SIARH-24) ---
+    function poblarSelectsCausas(niveles) {
+      jerarquiaCausasMemoria = niveles;
+      const selL1 = document.getElementById('inputCausaL1');
+      if (!selL1) return;
+      
+      selL1.innerHTML = '<option value="">-- Seleccione Categoría Principal --</option>';
+      
+      if (niveles && niveles.l1) {
+        niveles.l1.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.innerText = c;
+          selL1.appendChild(opt);
+        });
+      }
+    }
+
+    const selL1Elem = document.getElementById('inputCausaL1');
+    if (selL1Elem) {
+      selL1Elem.addEventListener('change', function() {
+        const valL1 = this.value;
+        const selL2 = document.getElementById('inputCausaL2');
+        const selL3 = document.getElementById('inputCausaL3');
+        const bloqueIVSS = document.getElementById('bloqueFechaCitaIVSS');
+
+        if (selL2) selL2.style.display = 'none';
+        if (selL3) selL3.style.display = 'none';
+        if (bloqueIVSS) bloqueIVSS.style.display = (valL1 === "Reposo con Cita IVSS") ? 'block' : 'none';
+
+        if (jerarquiaCausasMemoria && jerarquiaCausasMemoria.l2 && jerarquiaCausasMemoria.l2[valL1]) {
+          selL2.innerHTML = '<option value="">↳ Seleccione Subcategoría --</option>';
+          jerarquiaCausasMemoria.l2[valL1].forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.innerText = "↳ " + sub;
+            selL2.appendChild(opt);
+          });
+          selL2.style.display = 'block';
+        }
+      });
+    }
+
+    const selL2Elem = document.getElementById('inputCausaL2');
+    if (selL2Elem) {
+      selL2Elem.addEventListener('change', function() {
+        const valL2 = this.value;
+        const selL3 = document.getElementById('inputCausaL3');
+
+        if (selL3) selL3.style.display = 'none';
+
+        if (jerarquiaCausasMemoria && jerarquiaCausasMemoria.l3 && jerarquiaCausasMemoria.l3[valL2]) {
+          selL3.innerHTML = '<option value="">↳ Seleccione Causa Específica --</option>';
+          jerarquiaCausasMemoria.l3[valL2].forEach(causaFinal => {
+            const opt = document.createElement('option');
+            opt.value = causaFinal;
+            opt.innerText = "↳ " + causaFinal;
+            selL3.appendChild(opt);
+          });
+          selL3.style.display = 'block';
+        }
+      });
+    }
+
+    // --- VALIDACIÓN DE ARCHIVOS DE RECAUDOS ---
+    const inputArchivos = document.getElementById('inputArchivosAnexos');
+    if (inputArchivos) {
+      inputArchivos.addEventListener('change', function() {
+        const files = Array.from(this.files);
+        const MAX_SIZE_MB = 5;
+        
+        if (files.length > 3) {
+          alert("⚠️ Solo se permite adjuntar un máximo de 3 imágenes por solicitud.");
+          this.value = "";
+          return;
+        }
+
+        for (let f of files) {
+          if (!['image/jpeg', 'image/png', 'image/jpg'].includes(f.type)) {
+            alert(`⚠️ El archivo "${f.name}" no es válido. Solo se admiten imágenes JPG o PNG.`);
+            this.value = "";
+            return;
+          }
+          if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+            alert(`⚠️ El archivo "${f.name}" supera el tamaño máximo permitido de ${MAX_SIZE_MB}MB.`);
+            this.value = "";
+            return;
+          }
+        }
+      });
+    }
+
+
+
+
+	  
 
     vincularBoton('btnIrRegistrar', () => {
       cambiarPantalla('viewFormulario', "Abriendo formulario de faltas.");
@@ -1085,23 +1226,40 @@
     });
 
     // ACCIÓN: SIMULAR FALTA
-    vincularBoton('btnAceptarFalta', () => {
+vincularBoton('btnAceptarFalta', () => {
       const nombre = document.getElementById('inputNombre').value;
-      const causa = document.getElementById('inputCausa').value;
+      
+      // --- AQUI VA EL BLOQUE PARA CAPTURAR LOS SELECTS EN CASCADA ---
+      const l1 = document.getElementById('inputCausaL1').value;
+      const l2 = document.getElementById('inputCausaL2').value;
+      const l3 = document.getElementById('inputCausaL3').value;
+      
+      // La causa final será la más profunda que esté seleccionada
+      let causaSeleccionada = l1;
+      if (l2 && document.getElementById('inputCausaL2').style.display !== 'none') causaSeleccionada = l2;
+      if (l3 && document.getElementById('inputCausaL3').style.display !== 'none') causaSeleccionada = l3;
+      // -------------------------------------------------------------
+
       const duracion = document.getElementById('inputDuracion').value;
+      const tipoDuracion = document.querySelector('input[name="tipoDuracion"]:checked').value;
       const fechaInicio = document.getElementById('inputFechaInicio').value;
+      const fechaCita = document.getElementById('inputFechaCitaIVSS') ? document.getElementById('inputFechaCitaIVSS').value : "";
+      const recaudos = document.getElementById('inputRecaudos').value;
       const observaciones = document.getElementById('inputObservaciones').value;
 
-      if (!nombre || !duracion || !fechaInicio) {
-        alert("⚠️ Por favor complete los campos requeridos: Persona, Duración y Fecha de Inicio.");
+      if (!nombre || !causaSeleccionada || !duracion || !fechaInicio) {
+        alert("⚠️ Por favor complete los campos requeridos.");
         return;
       }
 
       datosMemoriaOculta = {
         nombre: nombre,
-        causa: causa,
-        duracion: parseInt(duracion, 10),
+        causa: causaSeleccionada, // <--- Aquí envías la causa final obtenida
+        duracion: tipoDuracion === "dias" ? parseInt(duracion, 10) : 0,
+        horas: tipoDuracion === "horas" ? parseInt(duracion, 10) : 0,
         fechaInicio: fechaInicio,
+        fechaCita: fechaCita,
+        recaudos: recaudos,
         observaciones: observaciones
       };
 
