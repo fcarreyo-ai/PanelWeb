@@ -1258,7 +1258,7 @@
         return;
       }
 
-      // --- CAPTURAR Y CONVERTIR ARCHIVOS ADJUNTOS A BASE64 ---
+      // --- CAPTURAR, REDIMENSIONAR (MÁX 1M PÍXELES) Y CONVERTIR A BASE64 ---
       const inputArch = document.getElementById('inputArchivosAnexos');
       let archivosBase64 = [];
       
@@ -1266,20 +1266,54 @@
         try {
           for (let i = 0; i < inputArch.files.length; i++) {
             const file = inputArch.files[i];
+            
+            // Función interna para comprimir y ajustar por debajo del límite de Google Apps Script (1 millón de píxeles)
             const base64Data = await new Promise((resolve, reject) => {
               const reader = new FileReader();
-              reader.onload = e => resolve(e.target.result.split(',')[1]);
-              reader.onerror = err => reject(err);
+              reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                  let width = img.width;
+                  let height = img.height;
+                  const MAX_DIM = 1000; // Límite seguro para Google Apps Script (< 1 MP)
+                  
+                  if (width > height) {
+                    if (width > MAX_DIM) {
+                      height = Math.round((height * MAX_DIM) / width);
+                      width = MAX_DIM;
+                    }
+                  } else {
+                    if (height > MAX_DIM) {
+                      width = Math.round((width * MAX_DIM) / height);
+                      height = MAX_DIM;
+                    }
+                  }
+                  
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, width, height);
+                  
+                  // Exportar a JPEG optimizado
+                  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                  resolve(dataUrl.split(',')[1]);
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+              };
+              reader.onerror = reject;
               reader.readAsDataURL(file);
             });
+
             archivosBase64.push({
-              nombre: file.name,
-              tipo: file.type,
+              nombre: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+              tipo: "image/jpeg",
               contenido: base64Data
             });
           }
         } catch (eFile) {
-          console.warn("Error leyendo archivos adjuntos: " + eFile.message);
+          console.warn("Error procesando archivos adjuntos: " + eFile.message);
         }
       }
       // -------------------------------------------------------
