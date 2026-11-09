@@ -790,17 +790,21 @@
       if (logMsg) console.log("[Navegación] -> " + logMsg);
     }
 
-    // VINCULACIÓN COMPATIBLE 100% MÓVIL
+	// VINCULACIÓN COMPATIBLE 100% MÓVIL (Actualizado para async/await)
     function vincularBoton(idBoton, accion) {
       const el = document.getElementById(idBoton);
       if (!el) return;
       
-      el.addEventListener('click', function() {
+      el.addEventListener('click', async function() {
         const caja = document.getElementById('diagnosticoCarga');
         if (caja) {
           caja.innerText += `\n👆 [Tap] Botón "${idBoton}" detectado con éxito.`;
         }
-        accion();
+        try {
+          await accion(); // Espera a que termine cualquier proceso asíncrono (como leer archivos)
+        } catch (err) {
+          console.error("Error en acción de botón:", err);
+        }
       });
     }
 
