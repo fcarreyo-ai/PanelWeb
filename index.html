@@ -504,7 +504,7 @@
         <div class="resumen-item"><span class="resumen-label">Fecha Reincorporación:</span><span class="resumen-value" id="valFechaReinc" style="font-weight: 600; color: var(--btn-primary);">--</span></div>
       </div>
       
-      <button class="btn-main" style="background-color: #2e6934;" id="btnGuardarDefinitivo">✅ Confirmar Falta</button>
+      <button class="btn-main" style="background-color: #2e6934;" id="">✅ Confirmar Falta</button>
       <button class="btn-main btn-secondary" id="btnCancelarConfirmacion">❌ Modificar / Cancelar</button>
     </div>
 
@@ -1323,7 +1323,7 @@ vincularBoton('btnAceptarFalta', () => {
       });
     });
 
-    // ACCIÓN: ASENTAMIENTO DEFINITIVO DE FALTA
+	// ACCIÓN: ASENTAMIENTO DEFINITIVO DE FALTA
     vincularBoton('btnGuardarDefinitivo', () => {
       if (!datosMemoriaOculta) return;
 
@@ -1347,14 +1347,36 @@ vincularBoton('btnAceptarFalta', () => {
       })
       .then(resJson => {
         if (resJson.estatus === "OK") {
-			alert("¡Registro guardado con éxito en Google Sheets!");
+          alert("¡Registro guardado con éxito en Google Sheets!");
           
-			document.getElementById('inputNombre').value = "";
-			document.getElementById('inputCausa').value = "";
-			document.getElementById('inputDuracion').value = "";
-			document.getElementById('inputFechaInicio').value = "";
-			document.getElementById('inputObservaciones').value = "";
-			cambiarPantalla('viewMenu', "Completado.");
+          // --- LIMPIEZA CORREGIDA DE CAMPOS ---
+          document.getElementById('inputNombre').value = "";
+          
+          // Limpiar selects en cascada y campos nuevos
+          const selL1 = document.getElementById('inputCausaL1');
+          const selL2 = document.getElementById('inputCausaL2');
+          const selL3 = document.getElementById('inputCausaL3');
+          if (selL1) selL1.value = "";
+          if (selL2) { selL2.value = ""; selL2.style.display = "none"; }
+          if (selL3) { selL3.value = ""; selL3.style.display = "none"; }
+
+          document.getElementById('inputDuracion').value = "";
+          document.getElementById('inputFechaInicio').value = "";
+          
+          const inputCita = document.getElementById('inputFechaCitaIVSS');
+          if (inputCita) inputCita.value = "";
+          const bloqueCita = document.getElementById('bloqueFechaCitaIVSS');
+          if (bloqueCita) bloqueCita.style.display = "none";
+
+          const inputRec = document.getElementById('inputRecaudos');
+          if (inputRec) inputRec.value = "";
+          const inputArch = document.getElementById('inputArchivosAnexos');
+          if (inputArch) inputArch.value = "";
+
+          document.getElementById('inputObservaciones').value = "";
+          // ------------------------------------
+
+          cambiarPantalla('viewMenu', "Completado.");
 
         } else {
           alert("Error al guardar: " + resJson.detalle);
