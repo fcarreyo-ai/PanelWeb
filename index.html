@@ -1231,19 +1231,16 @@
     });
 
     // ACCIÓN: SIMULAR FALTA
-vincularBoton('btnAceptarFalta', () => {
+    vincularBoton('btnAceptarFalta', async () => {
       const nombre = document.getElementById('inputNombre').value;
       
-      // --- AQUI VA EL BLOQUE PARA CAPTURAR LOS SELECTS EN CASCADA ---
       const l1 = document.getElementById('inputCausaL1').value;
       const l2 = document.getElementById('inputCausaL2').value;
       const l3 = document.getElementById('inputCausaL3').value;
       
-      // La causa final será la más profunda que esté seleccionada
       let causaSeleccionada = l1;
       if (l2 && document.getElementById('inputCausaL2').style.display !== 'none') causaSeleccionada = l2;
       if (l3 && document.getElementById('inputCausaL3').style.display !== 'none') causaSeleccionada = l3;
-      // -------------------------------------------------------------
 
       const duracion = document.getElementById('inputDuracion').value;
       const tipoDuracion = document.querySelector('input[name="tipoDuracion"]:checked').value;
@@ -1257,15 +1254,42 @@ vincularBoton('btnAceptarFalta', () => {
         return;
       }
 
+      // --- CAPTURAR Y CONVERTIR ARCHIVOS ADJUNTOS A BASE64 ---
+      const inputArch = document.getElementById('inputArchivosAnexos');
+      let archivosBase64 = [];
+      
+      if (inputArch && inputArch.files && inputArch.files.length > 0) {
+        try {
+          for (let i = 0; i < inputArch.files.length; i++) {
+            const file = inputArch.files[i];
+            const base64Data = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = e => resolve(e.target.result.split(',')[1]);
+              reader.onerror = err => reject(err);
+              reader.readAsDataURL(file);
+            });
+            archivosBase64.push({
+              nombre: file.name,
+              tipo: file.type,
+              contenido: base64Data
+            });
+          }
+        } catch (eFile) {
+          console.warn("Error leyendo archivos adjuntos: " + eFile.message);
+        }
+      }
+      // -------------------------------------------------------
+
       datosMemoriaOculta = {
         nombre: nombre,
-        causa: causaSeleccionada, // <--- Aquí envías la causa final obtenida
+        causa: causaSeleccionada,
         duracion: tipoDuracion === "dias" ? parseInt(duracion, 10) : 0,
         horas: tipoDuracion === "horas" ? parseInt(duracion, 10) : 0,
         fechaInicio: fechaInicio,
         fechaCita: fechaCita,
         recaudos: recaudos,
-        observaciones: observaciones
+        observaciones: observaciones,
+        archivos: archivosBase64 // <--- Adjuntamos los archivos convertidos
       };
 
       document.getElementById('txtProgresoDinamico').innerText = "Procesando pre-cálculo en Google Sheets, por favor espere...";
