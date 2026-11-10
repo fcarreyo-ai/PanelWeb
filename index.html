@@ -472,7 +472,7 @@
         <input type="file" id="inputArchivosAnexos" accept="image/jpeg, image/png" multiple style="font-size:12px; padding:6px;">
       </div>
 
-      <button class="btn-main" id="btnAceptarFalta">🚀 Aceptar y Procesar</button>
+      <button class="btn-main" id="">🚀 Aceptar y Procesar</button>
       <button class="btn-main btn-secondary" id="btnVolverMenu">⬅️ Volver al Menú</button>
     </div>
 
@@ -1293,6 +1293,8 @@
                   canvas.width = width;
                   canvas.height = height;
                   const ctx = canvas.getContext('2d');
+					
+				  ctx.fillStyle = '#FFFFFF';
                   ctx.drawImage(img, 0, 0, width, height);
                   
                   // Exportar a JPEG optimizado
