@@ -637,6 +637,7 @@
     let datosMemoriaOculta = null;
     let datosMemoriaInclusion = null;
 	let jerarquiaCausasMemoria = null;
+	  let mapaDuracionDefectoGlobal = {};
 
     // Pintar etiquetas de usuario
     document.getElementById('userTagMenu').innerText = "Usuario: " + TELEGRAM_USER_NAME;
@@ -682,7 +683,6 @@
 			  
             const selectNombre = document.getElementById('inputNombre');
             const selectNombreInclusion = document.getElementById('inputNombreInclusion');
-            //const selectCausa = document.getElementById('inputCausa');
 			  
 			  const selectNombreOpA = document.getElementById('inputNombreOpA');
 			  const selectNombreOpB = document.getElementById('inputNombreOpB');
@@ -726,15 +726,6 @@
 				selectNombreSimple.appendChild(opt5);			  
 			  
             });
-			/*
-            selectCausa.innerHTML = '<option value="">-- Seleccione Causa --</option>';
-            data.causas.forEach(c => {
-              const opt = document.createElement('option');
-              opt.value = c;
-              opt.innerText = c;
-              selectCausa.appendChild(opt);
-            });
-			*/
 
             // INYECTAR DINÁMICAMENTE LAS MÁS DE 30 COLUMNAS PROVENIENTES DE LA HOJA 'PERSONAS'
             const contenedorCol = document.getElementById('contenedorColumnas');
@@ -755,7 +746,7 @@
 
             if (cajaDiag) {
               cajaDiag.style.color = '#0f0';
-              cajaDiag.innerText = `📡 PanelWeb v5.2.2 -20261110-003\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+              cajaDiag.innerText = `📡 PanelWeb v5.2.3 -20261111-001\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
             }
 
             // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
@@ -813,6 +804,11 @@
 // --- LÓGICA DE NIVELES EN CASCADA (SIARH-24) ---
     function poblarSelectsCausas(niveles) {
       jerarquiaCausasMemoria = niveles;
+
+	  if (niveles && niveles.duracionDefecto) {
+        mapaDuracionDefectoGlobal = niveles.duracionDefecto;
+      }		
+		
       const selL1 = document.getElementById('inputCausaL1');
       if (!selL1) return;
       
@@ -825,6 +821,22 @@
           opt.innerText = c;
           selL1.appendChild(opt);
         });
+      }
+    }
+
+	// ⏱️ NUEVO: Función para detectar la causa final seleccionada y aplicar su duración por defecto
+    function verificarYAplicarDuracionDefecto() {
+      const l1 = document.getElementById('inputCausaL1').value;
+      const l2 = document.getElementById('inputCausaL2').value;
+      const l3 = document.getElementById('inputCausaL3').value;
+      
+      let causaActual = l1;
+      if (l2 && document.getElementById('inputCausaL2').style.display !== 'none') causaActual = l2;
+      if (l3 && document.getElementById('inputCausaL3').style.display !== 'none') causaActual = l3;
+
+      const inputDuracion = document.getElementById('inputDuracion');
+      if (inputDuracion && causaActual && mapaDuracionDefectoGlobal[causaActual] !== undefined) {
+        inputDuracion.value = mapaDuracionDefectoGlobal[causaActual];
       }
     }
 
@@ -850,6 +862,7 @@
           });
           selL2.style.display = 'block';
         }
+		verificarYAplicarDuracionDefecto();
       });
     }
 
@@ -871,8 +884,16 @@
           });
           selL3.style.display = 'block';
         }
+		verificarYAplicarDuracionDefecto();
       });
     }
+
+	const selL3Elem = document.getElementById('inputCausaL3');
+    if (selL3Elem) {
+      selL3Elem.addEventListener('change', function() {
+        verificarYAplicarDuracionDefecto();
+      });
+    }	  
 
     // --- VALIDACIÓN DE ARCHIVOS DE RECAUDOS ---
     const inputArchivos = document.getElementById('inputArchivosAnexos');
