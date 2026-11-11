@@ -746,7 +746,7 @@
 
             if (cajaDiag) {
               cajaDiag.style.color = '#0f0';
-              cajaDiag.innerText = `📡 PanelWeb v5.2.3 -20261111-001\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
+              cajaDiag.innerText = `📡 PanelWeb v5.2.3 -20261111-002\nSincronización Exitosa (Base de Datos)\n• Personal: ${data.personal.length} operadores activos\n• Causas: ${data.causas.length} registradas\n• Columnas detectadas: ${data.columnas ? data.columnas.length : 0}\n• Acceso verificado con éxito.`;
             }
 
             // CAMBIO CLAVE: TRANSICIÓN EXITOSA AL MENÚ PRINCIPAL
@@ -836,7 +836,11 @@
 
       const inputDuracion = document.getElementById('inputDuracion');
       if (inputDuracion && causaActual && mapaDuracionDefectoGlobal[causaActual] !== undefined) {
+		  
         inputDuracion.value = mapaDuracionDefectoGlobal[causaActual];
+		const radioDias = document.querySelector('input[name="tipoDuracion"][value="dias"]');
+        if (radioDias) radioDias.checked = true;		  
+		  
       }
     }
 
@@ -1446,6 +1450,10 @@
           if (selL3) { selL3.value = ""; selL3.style.display = "none"; }
 
           document.getElementById('inputDuracion').value = "";
+
+		  const radioDias = document.querySelector('input[name="tipoDuracion"][value="dias"]');
+          if (radioDias) radioDias.checked = true;
+			
           document.getElementById('inputFechaInicio').value = "";
           
           const inputCita = document.getElementById('inputFechaCitaIVSS');
